@@ -92,6 +92,8 @@ class Sketch {
       this.setup();
     } else if (e.code == "KeyT") {
       this._boids.forEach(b => b.show_trail = !b.show_trail);
+    } else if (e.code == "KeyY") {
+      this._boids.forEach(b => b.dynamic_factors = !b.dynamic_factors);
     }
   }
 
@@ -135,14 +137,23 @@ class Sketch {
     });
     // show fps
     if (this._show_fps) {
+      let size;
+      size = 20;
       this._ctx.save();
       this._ctx.textBaseline = "top";
-      this._ctx.font = "20px Roboto";
+      this._ctx.font = `${size}px Roboto`;
       this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
 
       this._ctx.textAlign = "left";
-      this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, 20, 20);
-      this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, 20, 40);
+      this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, size, size);
+      this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, size, size * 2);
+
+      this._ctx.textAlign = "right";
+      let count = 0;
+      for (const [key, value, i] of Object.entries(this._boids[0].factors)) {
+        this._ctx.fillText(`${key}: ${value}`, this._width - size, size * (count + 1));
+        count++;
+      }
 
       this._ctx.restore();
     }

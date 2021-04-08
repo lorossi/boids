@@ -4,6 +4,7 @@ class Boid {
     this._height = height;
     this._border = 0.1 * this._width;
     this._hue = random(0, 30);
+    this._dHue = 0;
 
     this._pos = new Vector(random(this._border, this._width - this._border), random(this._border, this._height - this._border));
     this._vel = Vector.random2D();
@@ -11,6 +12,7 @@ class Boid {
     this._force = new Vector();
     this._gravity_center = null;
     this._show_trail = true;
+    this._dynamic_factors = true;
 
     // parameters
     this._max_vel = 3;
@@ -38,13 +40,21 @@ class Boid {
   move(boids, frames, seed) {
     // some time variance
     // rule 1
-    this._separation_factor = 0.3 * (1 + 0.25 * Math.sin(frames / (60 * 10) + seed));
+    this._separation_factor = 0.3;
     // rule 2
-    this._alignment_factor = 0.7 * (1 + 0.25 * Math.sin(frames / (60 * 10) + Math.PI * seed));
+    this._alignment_factor = 0.7;
     // rule 3
-    this._cohesion_factor = 1 * (1 + 0.25 * Math.sin(frames / (60 * 10) + 3 * Math.PI * seed));
+    this._cohesion_factor = 1;
     // gravity
-    this._gravity_factor = 1 * (1 + 0.5 * Math.sin(frames / (60 * 10) + 5 * Math.PI * seed));
+    this._gravity_factor = 1;
+
+    if (this._dynamic_factors) {
+      this._separation_factor *= (1 + 0.25 * Math.sin(frames / (60 * 10) + seed));
+      this._alignment_factor *= (1 + 0.25 * Math.sin(frames / (60 * 10) + Math.PI * seed));
+      this._cohesion_factor *= (1 + 0.25 * Math.sin(frames / (60 * 10) + 3 * Math.PI * seed));
+      this._gravity_factor *= (1 + 0.5 * Math.sin(frames / (60 * 10) + 5 * Math.PI * seed));
+      this._dHue = Math.sin(frames / (60 * 5) + 5 * Math.PI * seed) * 4;
+    }
 
     // all close boids excluding this one
     let others;
@@ -216,8 +226,8 @@ class Boid {
     ctx.save();
     ctx.translate(px, py);
     ctx.rotate(this._vel.heading2D() + Math.PI / 2);
-    ctx.fillStyle = `hsla(${this._hue}, 100%, 50%, 0.6)`;
-    ctx.strokeStyle = `hsla(${this._hue}, 100%, 50%, 0.9)`;
+    ctx.fillStyle = `hsla(${this._hue + this._dHue}, 100%, 50%, 0.6)`;
+    ctx.strokeStyle = `hsla(${this._hue + this._dHue}, 100%, 50%, 0.9)`;
     ctx.beginPath();
     ctx.moveTo(-this._triangle_side / 2, 0);
     ctx.lineTo(0, -this._triangle_height);
@@ -258,5 +268,23 @@ class Boid {
 
   set show_trail(s) {
     this._show_trail = s;
+  }
+
+  get factors() {
+    return {
+      "dynamic factors": this._dynamic_factors,
+      separation: this._separation_factor.toFixed(3),
+      alignment: this._alignment_factor.toFixed(3),
+      cohesion: this._cohesion_factor.toFixed(3),
+      gravity: this._gravity_factor.toFixed(3),
+    };
+  }
+
+  get dynamic_factors() {
+    return this._dynamic_factors;
+  }
+
+  set dynamic_factors(d) {
+    this._dynamic_factors = d;
   }
 }
