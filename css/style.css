@@ -1,7 +1,16 @@
+@font-face {
+  font-family: Roboto;
+  src: url(/assets/fonts/Roboto-Light.ttf);
+}
+
 body *, body {
   margin: 0;
   padding: 0;
   overflow: hidden;
+}
+
+body {
+  font-family: Roboto;
 }
 
 .container {
@@ -16,4 +25,13 @@ body *, body {
 #sketch {
   min-width: 300px;
   min-height: 300px;
+}
+
+#instructions {
+  position: fixed;
+  left: 1vh;
+  top: 1vh;
+
+  user-select: none;
+  opacity: 0.5;
 }

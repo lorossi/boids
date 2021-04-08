@@ -10,6 +10,7 @@ class Boid {
     this._acc = Vector.random2D();
     this._force = new Vector();
     this._gravity_center = null;
+    this._show_trail = true;
 
     // parameters
     this._max_vel = 3;
@@ -19,7 +20,7 @@ class Boid {
     this._view_range = 50;
 
     // rendering
-    this._triangle_side = parseInt(random_interval(10, 2));
+    this._triangle_side = parseInt(random_interval(8, 2));
     this._triangle_height = parseInt(this._triangle_side * 1.5);
     this._trail = [];
   }
@@ -192,21 +193,24 @@ class Boid {
     py = parseInt(this._pos.y);
 
     // draw trail
-    ctx.save();
-    ctx.strokeStyle = `hsla(${this._hue}, 100%, 50%, 0.1)`;
-    ctx.strokeWidth = 2;
-    ctx.moveTo(px, py);
-    ctx.beginPath();
-    this._trail.forEach(t => {
-      if (!t.x || !t.y) {
-        ctx.stroke();
-        ctx.beginPath();
-      } else {
-        ctx.lineTo(t.x, t.y);
-      }
-    });
-    ctx.stroke();
-    ctx.restore();
+    if (this._show_trail) {
+      ctx.save();
+      ctx.strokeStyle = `hsla(${this._hue}, 100%, 50%, 0.1)`;
+      ctx.strokeWidth = 2;
+      ctx.moveTo(px, py);
+      ctx.beginPath();
+      this._trail.forEach(t => {
+        if (!t.x || !t.y) {
+          ctx.stroke();
+          ctx.beginPath();
+        } else {
+          ctx.lineTo(t.x, t.y);
+        }
+      });
+      ctx.stroke();
+      ctx.restore();
+
+    }
 
     // draw boid
     ctx.save();
@@ -246,5 +250,13 @@ class Boid {
     } else {
       this._gravity_center = g.copy();
     }
+  }
+
+  get show_trail() {
+    return this._show_trail;
+  }
+
+  set show_trail(s) {
+    this._show_trail = s;
   }
 }

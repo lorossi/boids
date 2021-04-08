@@ -61,7 +61,6 @@ class Sketch {
   }
 
   mousedown(e) {
-    console.log("DOWN");
     let mx, my;
     mx = e.offsetX;
     my = e.offsetY;
@@ -72,18 +71,16 @@ class Sketch {
   }
 
   mouseup(e) {
-    console.log("UP");
     this._boids.forEach(b => {
       b.gravity = null;
     });
   }
 
   mousedragged(e) {
-    console.log(e);
   }
 
   keydown(e) {
-    console.log({ code: e.code });
+    //console.log({ code: e.code });
 
     if (e.code == "KeyF") {
       this._show_fps = !this._show_fps;
@@ -91,6 +88,10 @@ class Sketch {
       this._boids.push(new Boid(this._width, this._height));
     } else if (e.code == "ArrowDown") {
       this._boids.pop();
+    } else if (e.code == "KeyR") {
+      this.setup();
+    } else if (e.code == "KeyT") {
+      this._boids.forEach(b => b.show_trail = !b.show_trail);
     }
   }
 
@@ -136,7 +137,7 @@ class Sketch {
     if (this._show_fps) {
       this._ctx.save();
       this._ctx.textBaseline = "top";
-      this._ctx.font = "20px calibri";
+      this._ctx.font = "20px Roboto";
       this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
 
       this._ctx.textAlign = "left";
@@ -163,4 +164,15 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("mousedown", e => s.mousedown(e));
   canvas.addEventListener("mouseup", e => s.mouseup(e));
   document.addEventListener("keydown", e => s.keydown(e));
+
+  let instructions = document.querySelector("#instructions");
+  instructions.addEventListener("mouseenter", (e) => instructions.style.opacity = 1);
+  instructions.addEventListener("mouseleave", (e) => instructions.style.opacity = 0.2);
+
+  setTimeout(() => {
+    instructions.style.transition = '1s';
+    instructions.style.opacity = 0.2;
+  }, 2000);
+
 });
+
