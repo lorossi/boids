@@ -8,11 +8,13 @@ class Boid {
     this._pos = new Vector(random(this._border, this._width - this._border), random(this._border, this._height - this._border));
     this._vel = Vector.random2D();
     this._acc = Vector.random2D();
+    this._force = new Vector();
+    this._gravity_center = null;
 
     // parameters
     this._max_vel = 3;
     this._max_acc = 20;
-    this._max_force = 10;
+    this._max_force = 20;
     this._trail_length = 40;
     this._view_range = 50;
 
@@ -20,6 +22,16 @@ class Boid {
     this._triangle_side = parseInt(random_interval(10, 2));
     this._triangle_height = parseInt(this._triangle_side * 1.5);
     this._trail = [];
+  }
+
+  attract(x, y) {
+    let steer;
+    steer = new Vector();
+    let center;
+    center = new Vector(x, y);
+    steer = center.sub(this._pos).setMag(10);
+
+    this._pos.add(steer);
   }
 
   move(boids, frames, seed) {
@@ -30,6 +42,8 @@ class Boid {
     this._alignment_factor = 0.7 * (1 + 0.25 * Math.sin(frames / (60 * 10) + Math.PI * seed));
     // rule 3
     this._cohesion_factor = 1 * (1 + 0.25 * Math.sin(frames / (60 * 10) + 3 * Math.PI * seed));
+    // gravity
+    this._gravity_factor = 1 * (1 + 0.5 * Math.sin(frames / (60 * 10) + 5 * Math.PI * seed));
 
     // all close boids excluding this one
     let others;
@@ -47,8 +61,12 @@ class Boid {
     let a3;
     a3 = this._cohesion(others);
 
+    // now add gravity
+    let a4;
+    a4 = this._gravity();
+
     // movement
-    this._force = new Vector().add(a1).add(a2).add(a3);
+    this._force = new Vector().add(a1).add(a2).add(a3).add(a4);
     this._force.limit(this._max_force);
     this._acc.add(this._force);
     this._acc.limit(this._max_acc);
@@ -98,6 +116,11 @@ class Boid {
 
   // separation rule
   _separation(boids) {
+    // skip separation if _gravity_center is defined
+    if (this._gravity_center) {
+      return new Vector(0, 0);
+    }
+
     let steer;
     steer = new Vector();
 
@@ -146,6 +169,19 @@ class Boid {
     }
 
     return steer;
+  }
+
+  // apply gravity
+  _gravity() {
+    // but only if the vector is defined
+    if (this._gravity_center) {
+      let steer;
+      steer = this._gravity_center.copy().sub(this._pos);
+      steer.mult(this._gravity_factor / (steer.mag() / this._view_range) ** (1 / 2));
+      return steer;
+    }
+
+    return new Vector(0, 0);
   }
 
   show(ctx) {
@@ -198,5 +234,17 @@ class Boid {
 
   get acc() {
     return this._acc.copy();
+  }
+
+  get gravity() {
+    return this._gravity_center.copy();
+  }
+
+  set gravity(g) {
+    if (g === null) {
+      this._gravity_center = null;
+    } else {
+      this._gravity_center = g.copy();
+    }
   }
 }
