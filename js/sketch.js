@@ -86,12 +86,22 @@ class Sketch {
   }
 
   setup() {
-    // ran once
-    this.background("white");
+    this._seed = parseInt(Date.now() / 1000);
+    this._boids = [];
+    for (let i = 0; i < 200; i++) {
+      this._boids.push(new Boid(this._width, this._height));
+    }
   }
 
   draw() {
     // ran continuosly
+    this.background("white");
+    this._boids.forEach(b => {
+      b.move(this._boids, this._frameCount, this._seed);
+      b.show(this._ctx);
+    });
+
+    if (this._frameCount % 60 == 0) console.log(this._frameRate);
   }
 }
 
