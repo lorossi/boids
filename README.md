@@ -2,7 +2,7 @@
 
 Boids simulation.
 
-## Try it here! 
+## Try it here! https://lorossi.github.io/boids/
 
 ## Credits
 
