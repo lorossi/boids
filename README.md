@@ -1,6 +1,7 @@
 # Boids
 
-Boids simulation.
+About
+Fairly simple and straitforward boids simulation in EcmaScript.
 
 ## Try it here! https://lorossi.github.io/boids/
 
