@@ -1,9 +1,9 @@
-# Empty HTML5 Canvas Project
-I got bored of creating a new document every time.
+# Boids
 
-Contains all the needed files to create a new HTML5 page with a JS canvas inside.
-
-Just clone the repo or download the last release.
+Boids simulation.
 
 ## Credits
+
 This project is distributed under Attribution 4.0 International (CC BY 4.0) license.
+
+Boids description by [vergenet.net](http://www.vergenet.net/~conrad/boids/pseudocode.html)
