@@ -61,9 +61,14 @@ class Sketch {
   }
 
   mousedown(e) {
+    let boundingBox;
+    boundingBox = this._canvas.getBoundingClientRect();
+    let ratio;
+    ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
+
     let mx, my;
-    mx = e.offsetX;
-    my = e.offsetY;
+    mx = (e.pageX - boundingBox.left) / ratio;
+    my = (e.pageY - boundingBox.top) / ratio;
 
     this._boids.forEach(b => {
       b.gravity = new Vector(mx, my);
@@ -77,6 +82,27 @@ class Sketch {
   }
 
   mousedragged(e) {
+  }
+
+  touchdown(e) {
+    let boundingBox;
+    boundingBox = this._canvas.getBoundingClientRect();
+    let ratio;
+    ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
+
+    let tx, ty;
+    tx = (e.touches[0].pageX - boundingBox.left) / ratio;
+    ty = (e.touches[0].pageY - boundingBox.top) / ratio;
+
+    this._boids.forEach(b => {
+      b.gravity = new Vector(tx, ty);
+    });
+  }
+
+  touchup(e) {
+    this._boids.forEach(b => {
+      b.gravity = null;
+    });
   }
 
   keydown(e) {
@@ -174,6 +200,8 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("click", e => s.click(e));
   canvas.addEventListener("mousedown", e => s.mousedown(e));
   canvas.addEventListener("mouseup", e => s.mouseup(e));
+  canvas.addEventListener("touchstart", e => s.touchdown(e));
+  canvas.addEventListener("touchend", e => s.touchup(e));
   document.addEventListener("keydown", e => s.keydown(e));
 
   let instructions = document.querySelector("#instructions");

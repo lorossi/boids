@@ -25,8 +25,5 @@ const dist = (x1, y1, x2, y2) => {
 };
 
 const constrain = (x, min_val = 0, max_val = 1) => {
-  if (x < min_val) x = min_val;
-  else if (x > max_val) x = max_val;
-
-  return x;
+  return Math.max(Math.min(x, max_val), min_val);
 };

@@ -17,24 +17,14 @@ class Boid {
     // parameters
     this._max_vel = 3;
     this._max_acc = 20;
-    this._max_force = 20;
-    this._trail_length = 40;
+    this._max_force = 3;
+    this._trail_length = 100;
     this._view_range = 50;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2));
     this._triangle_height = parseInt(this._triangle_side * 1.5);
     this._trail = [];
-  }
-
-  attract(x, y) {
-    let steer;
-    steer = new Vector();
-    let center;
-    center = new Vector(x, y);
-    steer = center.sub(this._pos).setMag(10);
-
-    this._pos.add(steer);
   }
 
   move(boids, frames, seed) {
@@ -205,7 +195,7 @@ class Boid {
     // draw trail
     if (this._show_trail) {
       ctx.save();
-      ctx.strokeStyle = `hsla(${this._hue}, 100%, 50%, 0.1)`;
+      ctx.strokeStyle = `hsla(${this._hue}, 100%, 75%, 0.2)`;
       ctx.strokeWidth = 2;
       ctx.moveTo(px, py);
       ctx.beginPath();
