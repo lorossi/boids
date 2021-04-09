@@ -2,24 +2,24 @@ class Boid {
   constructor(width, height) {
     this._width = width;
     this._height = height;
-    this._border = 0.1 * this._width;
+
+    // variables
     this._hue = 0;
     this._dHue = random(0, 40);
-
-    this._pos = new Vector(random(this._border, this._width - this._border), random(this._border, this._height - this._border));
-    this._vel = new Vector.random2D();
-    this._acc = new Vector.random2D();
-    this._force = new Vector();
     this._gravity_center = null;
     this._show_trail = true;
     this._dynamic_factors = false;
-
     // parameters
     this._max_vel = 2;
     this._max_acc = 20;
     this._max_force = 2;
     this._trail_length = 100;
     this._view_range = 50;
+    // vectors
+    this._pos = new Vector(random(this._view_range, this._width - this._view_range), random(this._view_range, this._height - this._view_range));
+    this._vel = new Vector.random2D();
+    this._acc = new Vector.random2D();
+    this._force = new Vector();
 
     // rule 1
     this._base_separation = 0.2;
@@ -28,7 +28,7 @@ class Boid {
     this._base_alignment = 0.9;
     this._alignment_factor = 0;
     // rule 3
-    this._base_cohesion = 1;
+    this._base_cohesion = 1.5;
     this._cohesion_factor = 0;
     // gravity
     this._base_gravity = 0.3;
@@ -177,12 +177,19 @@ class Boid {
     steer = new Vector(0, 0);
 
     if (this._can_see_border(this._pos)) {
+      // the boid can see the border, so get its current heading
       let heading = this._vel.heading2D();
       for (let i = 0; i < Math.PI; i += Math.PI / 25) {
+        // check angle from 0 to PI 
         for (let j = 0; j < 2; j++) {
+          // both on left and right, relative to heading
           let phi = i * (j == 0 ? -1 : 1) + heading;
+          // create new vector, same heading as current boid, as long as the view range
+          // and add the current poisition -> farthest it can see.
           let dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
           if (!this._can_see_border(dpos)) {
+            // with this current angle, the boid will avoid the border
+            // return the steering vector
             steer = new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
             return steer;
           }
@@ -195,10 +202,6 @@ class Boid {
 
   _can_see_border(vector) {
     return vector.x < this._view_range || vector.x > this._width - this._view_range || vector.y < this._view_range || vector.y > this._height - this._view_range;
-  }
-
-  _is_inside(vector) {
-    return vector.x > 0 && vector.x < this._width && vector.y > 0 && vector.y < this._height;
   }
 
   show(ctx) {
@@ -286,6 +289,7 @@ class Boid {
       alignment: this._alignment_factor.toFixed(2),
       cohesion: this._cohesion_factor.toFixed(2),
       hue: this._hue.toFixed(0),
+      viewrange: this._view_range.toFixed(0),
     };
   }
 
@@ -294,6 +298,7 @@ class Boid {
     this._base_alignment = f.alignment;
     this._base_cohesion = f.cohesion;
     this._hue = f.hue;
+    this._view_range = f.viewrange;
   }
 
   get dynamic() {
