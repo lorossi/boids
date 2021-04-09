@@ -7,14 +7,11 @@ Fairly simple and straitforward boids simulation in EcmaScript.
 
 ## Instructions
 
-- Press `F` to show some stats (FPS, number of boids);
-- Press `R` to reset the simulation
-- Press `T` to toggle trails
-- Press `UP` to add a boid, `DOWN` to remove one
-- `CLICK` anywhere on the canvas to attract boids
+- `CLICK` ( or `TAP`) anywhere on the canvas to attract boids
+ - Use the on screen inputs to influence the boids.
 
 ## Credits
 
 This project is distributed under Attribution 4.0 International (CC BY 4.0) license.
 
-Boids description by [vergenet.net](http://www.vergenet.net/~conrad/boids/pseudocode.html)
+Boids description by [wikipedia](https://en.wikipedia.org/wiki/Boids)
