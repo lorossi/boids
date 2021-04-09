@@ -142,7 +142,7 @@ class Sketch {
 
   draw() {
     // ran continuosly
-    this.background("rgb(240, 240, 240");
+    this.background("white");
     // draw and animate boids
     this._boids.forEach(b => {
       b.move(this._boids, this._frameCount, this._seed);
