@@ -107,20 +107,6 @@ class Sketch {
 
   keydown(e) {
     //console.log({ code: e.code });
-
-    if (e.code == "KeyF") {
-      this._show_fps = !this._show_fps;
-    } else if (e.code == "ArrowUp") {
-      this._boids.push(new Boid(this._width, this._height));
-    } else if (e.code == "ArrowDown") {
-      this._boids.pop();
-    } else if (e.code == "KeyR") {
-      this.setup();
-    } else if (e.code == "KeyT") {
-      this._boids.forEach(b => b.show_trail = !b.show_trail);
-    } else if (e.code == "KeyY") {
-      this._boids.forEach(b => b.dynamic_factors = !b.dynamic_factors);
-    }
   }
 
   saveAsImage(title) {
@@ -145,7 +131,7 @@ class Sketch {
   }
 
   setup() {
-    this._show_fps = false;
+    this._show_stats = false;
     this._seed = parseInt(Date.now() / 1000);
     this._boids = [];
     for (let i = 0; i < 150; i++) {
@@ -155,16 +141,16 @@ class Sketch {
 
   draw() {
     // ran continuosly
-    this.background("white");
+    this.background("rgb(240, 240, 240");
     // draw and animate boids
     this._boids.forEach(b => {
       b.move(this._boids, this._frameCount, this._seed);
       b.show(this._ctx);
     });
     // show fps
-    if (this._show_fps) {
+    if (this._show_stats) {
       let size;
-      size = 20;
+      size = 48;
       this._ctx.save();
       this._ctx.textBaseline = "top";
       this._ctx.font = `${size}px Roboto`;
@@ -174,15 +160,54 @@ class Sketch {
       this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, size, size);
       this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, size, size * 2);
 
-      this._ctx.textAlign = "right";
-      let count = 0;
-      for (const [key, value, i] of Object.entries(this._boids[0].factors)) {
-        this._ctx.fillText(`${key}: ${value}`, this._width - size, size * (count + 1));
-        count++;
-      }
-
       this._ctx.restore();
     }
+  }
+
+  addBoid(number = 1) {
+    for (let i = 0; i < number; i++) {
+      this._boids.push(new Boid(this._width, this._height));
+    }
+  }
+
+  removeBoid(number = 1) {
+    for (let i = 0; i < number && this._boids.length > 0; i++) {
+      this._boids.shift();
+    }
+  }
+
+  toggleTrail() {
+    this._boids.forEach(b => b.show_trail = !b.show_trail);
+    return this._boids[0].show_trail;
+  }
+
+  toggleDynamic() {
+    this._boids.forEach(b => b.dynamic = !b.dynamic);
+    return this._boids[0].dynamic;
+  }
+
+  boidsFactors() {
+    return this._boids[0].factors;
+  }
+
+  setFactors(f) {
+    this._boids.forEach(b => b.factors = f);
+  }
+
+  get show_stats() {
+    return this._show_stats;
+  }
+
+  set show_stats(s) {
+    this._show_stats = s;
+  }
+
+  get show_trails() {
+    return this._boids[0].show_trail;
+  }
+
+  get dynamic() {
+    return this._boids[0].dynamic;
   }
 }
 
@@ -204,14 +229,67 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("touchend", e => s.touchup(e));
   document.addEventListener("keydown", e => s.keydown(e));
 
-  let instructions = document.querySelector("#instructions");
-  instructions.addEventListener("mouseenter", (e) => instructions.style.opacity = 1);
-  instructions.addEventListener("mouseleave", (e) => instructions.style.opacity = 0.2);
+  let ranges;
+  ranges = [...document.querySelectorAll(".form input[type=range]")];
 
-  setTimeout(() => {
-    instructions.style.transition = '1s';
-    instructions.style.opacity = 0.2;
-  }, 2000);
+  let trail_checkbox, dynamic_checkbox, stats_checkbox;
+  trail_checkbox = document.querySelector("#showtrail");
+  dynamic_checkbox = document.querySelector("#dynamic");
+  stats_checkbox = document.querySelector("#stats");
 
+  let add_button, remove_button, reset_button;
+  add_button = document.querySelector("#addboid");
+  remove_button = document.querySelector("#removeboid");
+  reset_button = document.querySelector("#reset");
+
+  // update ranges, labels and checkboxes
+  setInterval(() => {
+
+    ranges.forEach(r => r.disabled = s.dynamic);
+
+    for (const [key, value] of Object.entries(s.boidsFactors())) {
+
+      let label;
+      label = document.querySelector(`label[for=${key}] .value`);
+      if (label) {
+        label.innerHTML = value;
+      }
+
+      let range;
+      range = ranges.filter(r => r.id == key);
+      if (range) {
+        range.value = value;
+      }
+    }
+
+    trail_checkbox.checked = s.show_trails;
+    dynamic_checkbox.checked = s.dynamic;
+    stats_checkbox.checked = s.show_stats;
+
+
+  }, 50);
+
+
+
+  // handle ranges
+  ranges.forEach(range => {
+    range.addEventListener("input", () => {
+      let factors = {};
+      ranges.forEach(r => {
+        factors[r.id] = parseFloat(r.value);
+      });
+      s.setFactors(factors);
+    });
+  });
+
+  // handle checkboxes
+  trail_checkbox.addEventListener("input", () => s.toggleTrail());
+  dynamic_checkbox.addEventListener("input", () => s.toggleDynamic());
+  stats_checkbox.addEventListener("input", () => s.show_stats = !s.show_stats);
+
+  // handle buttons
+  add_button.addEventListener("click", () => s.addBoid());
+  remove_button.addEventListener("click", () => s.removeBoid());
+  reset_button.addEventListener("click", () => s.setup());
 });
 

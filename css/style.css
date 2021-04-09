@@ -6,33 +6,119 @@
 body *, body {
   margin: 0;
   padding: 0;
-  overflow: hidden;
+  overflow-x: hidden;
 }
 
 body {
   font-family: Roboto;
-  font-size: 0.9rem;
+  font-size: 1rem;
 }
 
 .container {
+  z-index: 10;
+
   width: 100vw;
   height: 100vh;
 
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: row;
+
+  flex-shrink: 1;
 }
 
 #sketch {
-  min-width: 300px;
-  min-height: 300px;
+  margin: 2.5vh;
+  max-width: 90vh;
+  max-height: 90vh;
+  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 3px 3px rgba(0,0,0,0.22);
 }
 
-#instructions {
-  position: fixed;
-  left: 1vh;
-  top: 1vh;
+.form {
+  display: flex;
+  justify-content: space-evenly;
+  align-items: center;
+  flex-direction: column;
+  flex-wrap: wrap;
 
-  user-select: none;
-  opacity: 0.5;
+  margin: 2.5vh;
+
+  min-height: 5vh;
+  max-width: 80vw;
+
+  flex-shrink: 0;
+}
+
+.form input[type=range] {
+  width: 10vw;
+}
+
+.form input[type=button] {
+  padding: .25rem;
+  color: black;
+  background-color: white;
+  border: 1px solid black;
+  border-radius: 3px;
+  font-size: inherit;
+}
+
+.form label {
+  margin-left: 0.25rem;
+}
+
+.wrapper {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: row;
+
+  margin: 1rem;
+}
+
+.instructions {
+  max-width: 20vw;
+  text-align: center;
+}
+
+.footer {
+  position: absolute;
+  bottom: 1vh;
+}
+
+@media only screen and (max-width: 600px) {
+  body {
+    font-size: 0.75rem;
+  }
+
+  .container {
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+
+  #sketch {
+    margin: 2vh;
+    max-width: 90vw;
+    max-height: 90vw;
+  }
+
+  .form {
+    margin: 2vh;
+    flex-direction: row;
+    min-height: 2vh;
+    max-width: 90vw;
+  }
+
+  .instructions {
+    max-width: 80vw;
+    text-align: center;
+  }
+
+  .form input[type=range] {
+    width: 20vw;
+  }
+
+  .wrapper {
+    margin: 1vh;
+  }
 }

@@ -12,7 +12,7 @@ class Boid {
     this._force = new Vector();
     this._gravity_center = null;
     this._show_trail = true;
-    this._dynamic_factors = true;
+    this._dynamic_factors = false;
 
     // parameters
     this._max_vel = 3;
@@ -20,6 +20,19 @@ class Boid {
     this._max_force = 3;
     this._trail_length = 100;
     this._view_range = 50;
+
+    // rule 1
+    this._base_separation = 0.3;
+    this._separation_factor = 0;
+    // rule 2
+    this._base_alignment = 0.7;
+    this._alignment_factor = 0;
+    // rule 3
+    this._base_cohesion = 1;
+    this._cohesion_factor = 0;
+    // gravity
+    this._base_gravity = 1;
+    this._gravity_factor = 0;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2));
@@ -29,21 +42,18 @@ class Boid {
 
   move(boids, frames, seed) {
     // some time variance
-    // rule 1
-    this._separation_factor = 0.3;
-    // rule 2
-    this._alignment_factor = 0.7;
-    // rule 3
-    this._cohesion_factor = 1;
-    // gravity
-    this._gravity_factor = 1;
 
     if (this._dynamic_factors) {
-      this._separation_factor *= (1 + 0.25 * Math.sin(frames / (60 * 10) + seed));
-      this._alignment_factor *= (1 + 0.25 * Math.sin(frames / (60 * 10) + Math.PI * seed));
-      this._cohesion_factor *= (1 + 0.25 * Math.sin(frames / (60 * 10) + 3 * Math.PI * seed));
-      this._gravity_factor *= (1 + 0.5 * Math.sin(frames / (60 * 10) + 5 * Math.PI * seed));
+      this._separation_factor = this._base_separation * (1 + 0.25 * Math.sin(frames / (60 * 10) + seed));
+      this._alignment_factor = this._base_alignment * (1 + 0.25 * Math.sin(frames / (60 * 10) + Math.PI * seed));
+      this._cohesion_factor = this._base_cohesion * (1 + 0.25 * Math.sin(frames / (60 * 10) + 3 * Math.PI * seed));
+      this._gravity_factor = this._base_gravity * (1 + 0.5 * Math.sin(frames / (60 * 10) + 5 * Math.PI * seed));
       this._dHue = Math.sin(frames / (60 * 5) + 5 * Math.PI * seed) * 4;
+    } else {
+      this._separation_factor = this._base_separation;
+      this._alignment_factor = this._base_alignment;
+      this._cohesion_factor = this._base_cohesion;
+      this._gravity_factor = this._base_gravity;
     }
 
     // all close boids excluding this one
@@ -116,7 +126,7 @@ class Boid {
   }
 
   // separation rule
-  _separation(boids) {
+  _separation(boids, separation) {
     // skip separation if _gravity_center is defined
     if (this._gravity_center) {
       return new Vector(0, 0);
@@ -137,7 +147,7 @@ class Boid {
   }
 
   // alignment rule
-  _alignment(boids) {
+  _alignment(boids, alignment) {
     let steer;
     steer = new Vector();
 
@@ -153,7 +163,7 @@ class Boid {
   }
 
   // cohesion rule
-  _cohesion(boids) {
+  _cohesion(boids, cohesion) {
     let steer;
     steer = new Vector();
 
@@ -173,7 +183,7 @@ class Boid {
   }
 
   // apply gravity
-  _gravity() {
+  _gravity(gravity) {
     // but only if the vector is defined
     if (this._gravity_center) {
       let steer;
@@ -262,19 +272,25 @@ class Boid {
 
   get factors() {
     return {
-      "dynamic factors": this._dynamic_factors,
-      separation: this._separation_factor.toFixed(3),
-      alignment: this._alignment_factor.toFixed(3),
-      cohesion: this._cohesion_factor.toFixed(3),
-      gravity: this._gravity_factor.toFixed(3),
+      separation: this._separation_factor.toFixed(2),
+      alignment: this._alignment_factor.toFixed(2),
+      cohesion: this._cohesion_factor.toFixed(2),
+      gravity: this._gravity_factor.toFixed(2),
     };
   }
 
-  get dynamic_factors() {
+  set factors(f) {
+    this._base_separation = f.separation;
+    this._base_alignment = f.alignment;
+    this._base_cohesion = f.cohesion;
+    this._base_gravity = f.gravity;
+  }
+
+  get dynamic() {
     return this._dynamic_factors;
   }
 
-  set dynamic_factors(d) {
+  set dynamic(d) {
     this._dynamic_factors = d;
   }
 }
