@@ -27,40 +27,42 @@
       <div class="wrapper instructions">Click (or tap) on the screen to attract the boids. <br>
         Change parameters (and influence how boids move) by using the sliders.</div>
       <div class="wrapper">
-        <input type="range" id="separation" name="separation" min="0" max="3" step="0.05">
-        <label for="separation">separation <span class="value"></span> </label>
+        <div class="formelement">
+          <input type="range" id="separation" name="separation" min="0" max="3" step="0.05">
+          <label for="separation">separation <span class="value"></span> </label>
+        </div>
+        <div class="formelement">
+          <label for="alignment">alignment <span class="value"></span></label>
+          <input type="range" id="alignment" name="alignment" min="0" max="3" step="0.05">
+        </div>
       </div>
       <div class="wrapper">
-        <input type="range" id="alignment" name="alignment" min="0" max="3" step="0.05">
-        <label for="alignment">alignment <span class="value"></span></label>
+        <div class="formelement">
+          <input type="range" id="cohesion" name="cohesion" min="0" max="3" step="0.05">
+          <label for="cohesion">cohesion <span class="value"></span></label>
+        </div>
+        <div class="formelement">
+          <label for="hue">hue <span class="value"></span>°</label>
+          <input type="range" id="hue" name="hue" min="0" max="360" step="1">
+        </div>
       </div>
-      <div class="wrapper">
-        <input type="range" id="cohesion" name="cohesion" min="0" max="3" step="0.05">
-        <label for="cohesion">cohesion <span class="value"></span></label>
+      <div class="center-wrapper">
+        <div class="formelement">
+          <input type="checkbox" id="dynamic" name="dynamic">
+          <label for="dynamic">time changing parameters</label>
+        </div>
+        <div class="formelement">
+          <input type="checkbox" id="stats" name="stats">
+          <label for="stats">show stats</label>
+        </div>
+        <div class="formelement">
+          <input type="checkbox" id="showtrail" name="showtrail">
+          <label for="showtrail">show trail</label>
+        </div>
       </div>
-      <div class="wrapper">
-        <input type="range" id="gravity" name="gravity" min="0" max="3" step="0.05">
-        <label for="gravity">gravity <span class="value"></span></label>
-      </div>
-      <div class="wrapper">
-        <input type="checkbox" id="dynamic" name="dynamic">
-        <label for="dynamic">time changing parameters</label>
-      </div>
-      <div class="wrapper">
-        <input type="checkbox" id="stats" name="stats">
-        <label for="stats">show stats</label>
-      </div>
-      <div class="wrapper">
-        <input type="checkbox" id="showtrail" name="showtrail">
-        <label for="showtrail">show trail</label>
-      </div>
-      <div class="wrapper">
+      <div class="center-wrapper">
         <input type="button" id="addboid" value="Add boid">
-      </div>
-      <div class="wrapper">
         <input type="button" id="removeboid" value="Remove boid">
-      </div>
-      <div class="wrapper">
         <input type="button" id="reset" value="Reset">
       </div>
     </div>

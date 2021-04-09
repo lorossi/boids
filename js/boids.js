@@ -3,8 +3,8 @@ class Boid {
     this._width = width;
     this._height = height;
     this._border = 0.1 * this._width;
-    this._hue = random(0, 30);
-    this._dHue = 0;
+    this._hue = 0;
+    this._dHue = random(0, 40);
 
     this._pos = new Vector(random(this._border, this._width - this._border), random(this._border, this._height - this._border));
     this._vel = new Vector.random2D();
@@ -49,8 +49,7 @@ class Boid {
       this._separation_factor = this._base_separation * (1 + 0.25 * Math.sin(frames / (60 * 10) + seed));
       this._alignment_factor = this._base_alignment * (1 + 0.25 * Math.sin(frames / (60 * 10) + Math.PI * seed));
       this._cohesion_factor = this._base_cohesion * (1 + 0.25 * Math.sin(frames / (60 * 10) + 3 * Math.PI * seed));
-      this._gravity_factor = this._base_gravity * (1 + 0.5 * Math.sin(frames / (60 * 10) + 5 * Math.PI * seed));
-      this._dHue = Math.sin(frames / (60 * 5) + 5 * Math.PI * seed) * 4;
+      this._hue = 360 * (1 + Math.sin(frames / (60 * 30) + 5 * Math.PI * seed)) / 2;
     } else {
       this._separation_factor = this._base_separation;
       this._alignment_factor = this._base_alignment;
@@ -78,7 +77,7 @@ class Boid {
     let a4;
     a4 = this._gravity();
 
-    // check obstacles
+    // check and avoid obstacles
     let a5;
     a5 = this._avoid_border();
 
@@ -90,35 +89,6 @@ class Boid {
     this._vel.add(this._acc);
     this._vel.limit(this._max_vel);
     this._pos.add(this._vel);
-
-    // wrapping
-    /*let wrapped = false;
-    if (this._pos.x < 0) {
-      this._pos.x += this._width;
-      wrapped = true;
-    }
-    else if (this._pos.x > this._width) {
-      this._pos.x -= this._width;
-      wrapped = true;
-    }
-
-    if (this._pos.y < 0) {
-      this._pos.y += this._height;
-      wrapped = true;
-    }
-    else if (this._pos.y > this._height) {
-      this._pos.y -= this._height;
-      wrapped = true;
-    }
-
-    if (wrapped) {
-      this._trail.push(
-        {
-          x: false,
-          y: false,
-        }
-      );
-    }*/
 
     // trail generation
     // rounding for better canvas performances
@@ -238,10 +208,13 @@ class Boid {
     px = parseInt(this._pos.x);
     py = parseInt(this._pos.y);
 
+    let hue;
+    hue = (this._hue + this._dHue) % 360;
+
     // draw trail
     if (this._show_trail) {
       ctx.save();
-      ctx.strokeStyle = `hsla(${this._hue}, 100%, 75%, 0.2)`;
+      ctx.strokeStyle = `hsla(${hue}, 100%, 75%, 0.2)`;
       ctx.strokeWidth = 2;
       ctx.moveTo(px, py);
       ctx.beginPath();
@@ -261,8 +234,8 @@ class Boid {
     ctx.save();
     ctx.translate(px, py);
     ctx.rotate(this._vel.heading2D());
-    ctx.fillStyle = `hsla(${this._hue + this._dHue}, 100%, 50%, 0.6)`;
-    ctx.strokeStyle = `hsla(${this._hue + this._dHue}, 100%, 50%, 0.9)`;
+    ctx.fillStyle = `hsla(${hue}, 100%, 50%, 0.6)`;
+    ctx.strokeStyle = `hsla(${hue}, 100%, 50%, 0.9)`;
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.lineTo(0, -this._triangle_side / 2);
@@ -271,20 +244,7 @@ class Boid {
     ctx.fill();
     ctx.stroke();
 
-    // draw viewsight
-
-    /*
-    ctx.strokeStyle = "red";
-    ctx.strokeWidth = 4;
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(this._view_range, 0);
-    ctx.stroke();
-    */
-
     ctx.restore();
-
-
   }
 
   // getters
@@ -325,7 +285,7 @@ class Boid {
       separation: this._separation_factor.toFixed(2),
       alignment: this._alignment_factor.toFixed(2),
       cohesion: this._cohesion_factor.toFixed(2),
-      gravity: this._gravity_factor.toFixed(2),
+      hue: this._hue.toFixed(0),
     };
   }
 
@@ -333,7 +293,7 @@ class Boid {
     this._base_separation = f.separation;
     this._base_alignment = f.alignment;
     this._base_cohesion = f.cohesion;
-    this._base_gravity = f.gravity;
+    this._hue = f.hue;
   }
 
   get dynamic() {

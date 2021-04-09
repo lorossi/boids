@@ -28,11 +28,16 @@ body {
   flex-shrink: 1;
 }
 
+
+.form, #sketch {
+  box-shadow: 10px 10px 30px -1px rgba(0,0,0,0.25);
+  background: rgb(240, 240, 240);
+}
+
 #sketch {
   margin: 2.5vh;
   max-width: 90vh;
   max-height: 90vh;
-  box-shadow: 0 14px 28px rgba(0,0,0,0.25), 0 3px 3px rgba(0,0,0,0.22);
 }
 
 .form {
@@ -42,20 +47,26 @@ body {
   flex-direction: column;
   flex-wrap: wrap;
 
-  margin: 2.5vh;
-
+  position: relative;
   min-height: 5vh;
   max-width: 80vw;
-
+  padding-top: 2vh;
+  padding-bottom: 2vh;
+  padding-left: 2vw;
+  padding-right: 2vw;
   flex-shrink: 0;
 }
 
 .form input[type=range] {
-  width: 10vw;
+  width: 8vw;
 }
 
 .form input[type=button] {
-  padding: .25rem;
+  padding-top: .25rem;
+  padding-bottom: .25rem;
+  padding-left: .5rem;
+  padding-right: .5rem;
+
   color: black;
   background-color: white;
   border: 1px solid black;
@@ -65,20 +76,42 @@ body {
 
 .form label {
   margin-left: 0.25rem;
+  margin-right: 0.25rem;
+}
+
+.wrapper, .center-wrapper {
+  display: flex;
+  align-items: center;
+  flex-direction: row;
+  width: 100%;
+
+  margin-top: 1vh;
+  margin-bottom: 1vh;
 }
 
 .wrapper {
+  justify-content: space-between;
+}
+
+.center-wrapper{
+  justify-content: center;
+}
+
+.center-wrapper > input, .formelement {
+  margin-left: 0.5rem;
+  margin-right: 0.5rem;
+}
+
+.formelement {
   display: flex;
   justify-content: center;
   align-items: center;
   flex-direction: row;
-
-  margin: 1rem;
 }
 
 .instructions {
-  max-width: 20vw;
   text-align: center;
+  user-select: none;
 }
 
 .footer {
@@ -88,7 +121,7 @@ body {
 
 @media only screen and (max-width: 600px) {
   body {
-    font-size: 0.75rem;
+    font-size: 0.7rem;
   }
 
   .container {
@@ -103,9 +136,7 @@ body {
   }
 
   .form {
-    margin: 2vh;
     flex-direction: row;
-    min-height: 2vh;
     max-width: 90vw;
   }
 
@@ -116,9 +147,5 @@ body {
 
   .form input[type=range] {
     width: 20vw;
-  }
-
-  .wrapper {
-    margin: 1vh;
   }
 }
