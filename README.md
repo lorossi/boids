@@ -8,6 +8,8 @@ Fairly simple and straitforward boids simulation in EcmaScript.
 
 Boids (short for bird-like objects) are simulated version of birds. They act according to 3 simple rules (**separation**, **alignment** and **cohesion**) and they soon organize in natural-looking flocks. This kind of *artificial life* is often used in computer graphics and movies to emulate flocks and migrations of birds and other animals.
 
+I find this really fascinating. By setting a few extremely simple rules, even a cold frigid PC can emulate something... almost alive. Almost.
+
 This is my personal implementation, made by scratch by following the description on wikipedia.
 
 ## Instructions
