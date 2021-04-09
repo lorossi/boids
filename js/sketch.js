@@ -134,7 +134,8 @@ class Sketch {
     this._show_stats = false;
     this._seed = parseInt(Date.now() / 1000);
     this._boids = [];
-    for (let i = 0; i < 150; i++) {
+    this._font_size = 24 * 900 / this._canvas.height;
+    for (let i = 0; i < 200; i++) {
       this._boids.push(new Boid(this._width, this._height));
     }
   }
@@ -149,16 +150,14 @@ class Sketch {
     });
     // show fps
     if (this._show_stats) {
-      let size;
-      size = 48;
       this._ctx.save();
       this._ctx.textBaseline = "top";
-      this._ctx.font = `${size}px Roboto`;
+      this._ctx.font = `${this._font_size}px Roboto`;
       this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
 
       this._ctx.textAlign = "left";
-      this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, size, size);
-      this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, size, size * 2);
+      this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, this._font_size, this._font_size);
+      this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, this._font_size, this._font_size * 2);
 
       this._ctx.restore();
     }
@@ -184,6 +183,10 @@ class Sketch {
   toggleDynamic() {
     this._boids.forEach(b => b.dynamic = !b.dynamic);
     return this._boids[0].dynamic;
+  }
+
+  toggleStats() {
+    this._show_stats = !this._show_stats;
   }
 
   boidsFactors() {
@@ -258,18 +261,14 @@ document.addEventListener("DOMContentLoaded", () => {
       let range;
       range = ranges.filter(r => r.id == key);
       if (range) {
-        range.value = value;
+        range[0].value = value;
       }
     }
 
     trail_checkbox.checked = s.show_trails;
     dynamic_checkbox.checked = s.dynamic;
     stats_checkbox.checked = s.show_stats;
-
-
   }, 50);
-
-
 
   // handle ranges
   ranges.forEach(range => {
@@ -285,7 +284,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // handle checkboxes
   trail_checkbox.addEventListener("input", () => s.toggleTrail());
   dynamic_checkbox.addEventListener("input", () => s.toggleDynamic());
-  stats_checkbox.addEventListener("input", () => s.show_stats = !s.show_stats);
+  stats_checkbox.addEventListener("input", () => s.toggleStats());
 
   // handle buttons
   add_button.addEventListener("click", () => s.addBoid());

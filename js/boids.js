@@ -7,25 +7,25 @@ class Boid {
     this._dHue = 0;
 
     this._pos = new Vector(random(this._border, this._width - this._border), random(this._border, this._height - this._border));
-    this._vel = Vector.random2D();
-    this._acc = Vector.random2D();
+    this._vel = new Vector.random2D();
+    this._acc = new Vector.random2D();
     this._force = new Vector();
     this._gravity_center = null;
     this._show_trail = true;
     this._dynamic_factors = false;
 
     // parameters
-    this._max_vel = 3;
+    this._max_vel = 2;
     this._max_acc = 20;
-    this._max_force = 3;
+    this._max_force = 2;
     this._trail_length = 100;
     this._view_range = 50;
 
     // rule 1
-    this._base_separation = 0.3;
+    this._base_separation = 0.2;
     this._separation_factor = 0;
     // rule 2
-    this._base_alignment = 0.7;
+    this._base_alignment = 0.9;
     this._alignment_factor = 0;
     // rule 3
     this._base_cohesion = 1;
@@ -33,6 +33,8 @@ class Boid {
     // gravity
     this._base_gravity = 1;
     this._gravity_factor = 0;
+    // border / obstacle avoidance
+    this._avoidance_factor = 3;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2));
@@ -76,17 +78,21 @@ class Boid {
     let a4;
     a4 = this._gravity();
 
+    // check obstacles
+    let a5;
+    a5 = this._avoid_border();
+
     // movement
     this._force = new Vector().add(a1).add(a2).add(a3).add(a4);
     this._force.limit(this._max_force);
-    this._acc.add(this._force);
+    this._acc.add(this._force).add(a5);
     this._acc.limit(this._max_acc);
     this._vel.add(this._acc);
     this._vel.limit(this._max_vel);
     this._pos.add(this._vel);
 
     // wrapping
-    let wrapped = false;
+    /*let wrapped = false;
     if (this._pos.x < 0) {
       this._pos.x += this._width;
       wrapped = true;
@@ -112,7 +118,7 @@ class Boid {
           y: false,
         }
       );
-    }
+    }*/
 
     // trail generation
     // rounding for better canvas performances
@@ -126,7 +132,7 @@ class Boid {
   }
 
   // separation rule
-  _separation(boids, separation) {
+  _separation(boids) {
     // skip separation if _gravity_center is defined
     if (this._gravity_center) {
       return new Vector(0, 0);
@@ -147,7 +153,7 @@ class Boid {
   }
 
   // alignment rule
-  _alignment(boids, alignment) {
+  _alignment(boids) {
     let steer;
     steer = new Vector();
 
@@ -163,7 +169,7 @@ class Boid {
   }
 
   // cohesion rule
-  _cohesion(boids, cohesion) {
+  _cohesion(boids) {
     let steer;
     steer = new Vector();
 
@@ -183,7 +189,7 @@ class Boid {
   }
 
   // apply gravity
-  _gravity(gravity) {
+  _gravity() {
     // but only if the vector is defined
     if (this._gravity_center) {
       let steer;
@@ -193,6 +199,36 @@ class Boid {
     }
 
     return new Vector(0, 0);
+  }
+
+  // avoid obstacles
+  _avoid_border() {
+    let steer;
+    steer = new Vector(0, 0);
+
+    if (this._can_see_border(this._pos)) {
+      let heading = this._vel.heading2D();
+      for (let i = 0; i < Math.PI; i += Math.PI / 25) {
+        for (let j = 0; j < 2; j++) {
+          let phi = i * (j == 0 ? -1 : 1) + heading;
+          let dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
+          if (!this._can_see_border(dpos)) {
+            steer = new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
+            return steer;
+          }
+        }
+      }
+    }
+
+    return steer;
+  }
+
+  _can_see_border(vector) {
+    return vector.x < this._view_range || vector.x > this._width - this._view_range || vector.y < this._view_range || vector.y > this._height - this._view_range;
+  }
+
+  _is_inside(vector) {
+    return vector.x > 0 && vector.x < this._width && vector.y > 0 && vector.y < this._height;
   }
 
   show(ctx) {
@@ -219,22 +255,36 @@ class Boid {
       });
       ctx.stroke();
       ctx.restore();
-
     }
 
     // draw boid
     ctx.save();
     ctx.translate(px, py);
-    ctx.rotate(this._vel.heading2D() + Math.PI / 2);
+    ctx.rotate(this._vel.heading2D());
     ctx.fillStyle = `hsla(${this._hue + this._dHue}, 100%, 50%, 0.6)`;
     ctx.strokeStyle = `hsla(${this._hue + this._dHue}, 100%, 50%, 0.9)`;
     ctx.beginPath();
-    ctx.moveTo(-this._triangle_side / 2, 0);
-    ctx.lineTo(0, -this._triangle_height);
-    ctx.lineTo(this._triangle_side / 2, 0);
+    ctx.moveTo(0, 0);
+    ctx.lineTo(0, -this._triangle_side / 2);
+    ctx.lineTo(this._triangle_height, 0);
+    ctx.lineTo(0, this._triangle_side / 2);
     ctx.fill();
     ctx.stroke();
+
+    // draw viewsight
+
+    /*
+    ctx.strokeStyle = "red";
+    ctx.strokeWidth = 4;
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(this._view_range, 0);
+    ctx.stroke();
+    */
+
     ctx.restore();
+
+
   }
 
   // getters
