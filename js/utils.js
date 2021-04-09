@@ -39,7 +39,7 @@ const wrap = (x, min_val = 0, max_val = 1) => {
   while (x > max_val) x -= max_val - min_val;
   while (x < min_val) x += max_val - min_val;
   return x;
-}
+};
 
 const is_mobile = () => {
   return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
