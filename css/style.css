@@ -115,11 +115,6 @@ body {
   user-select: none;
 }
 
-.footer {
-  position: absolute;
-  bottom: 1vh;
-}
-
 @media only screen and (max-width: 600px) {
   body {
     font-size: 0.7rem;

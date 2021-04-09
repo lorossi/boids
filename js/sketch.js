@@ -131,12 +131,19 @@ class Sketch {
   }
 
   setup() {
+    this._is_mobile = is_mobile();
+    this._scale_factor = this._is_mobile ? 0.5 : 1;
+
     this._show_stats = false;
     this._seed = parseInt(Date.now() / 1000);
+    this._font_size = 24 * 900 / this._canvas.height * this._scale_factor;
+
+    let starting_boids;
+    starting_boids = this._is_mobile ? 100 : 200;
+
     this._boids = [];
-    this._font_size = 24 * 900 / this._canvas.height;
-    for (let i = 0; i < 200; i++) {
-      this._boids.push(new Boid(this._width, this._height));
+    for (let i = 0; i < starting_boids; i++) {
+      this._boids.push(new Boid(this._width, this._height, this._scale_factor));
     }
   }
 
@@ -165,7 +172,7 @@ class Sketch {
 
   addBoid(number = 1) {
     for (let i = 0; i < number; i++) {
-      this._boids.push(new Boid(this._width, this._height));
+      this._boids.push(new Boid(this._width, this._height, this._scale_factor));
     }
   }
 
@@ -216,11 +223,20 @@ class Sketch {
 
 
 document.addEventListener("DOMContentLoaded", () => {
+
+  // detect if the user is using a mobile in order to determine
+  // a more useful canvas size
+  let canvas_size;
+  canvas_size = is_mobile() ? 500 : 1000;
+
   // page loaded
   let canvas, ctx, s;
   canvas = document.querySelector("#sketch");
   // inject canvas in page
   if (canvas.getContext) {
+    canvas.setAttribute("width", canvas_size);
+    canvas.setAttribute("height", canvas_size);
+
     ctx = canvas.getContext("2d", { alpha: false });
     s = new Sketch(canvas, ctx);
   }
