@@ -31,7 +31,7 @@ class Boid {
     this._base_cohesion = 1;
     this._cohesion_factor = 0;
     // gravity
-    this._base_gravity = 1;
+    this._base_gravity = 0.3;
     this._gravity_factor = 0;
     // border / obstacle avoidance
     this._avoidance_factor = 3;
