@@ -34,8 +34,7 @@ class Sketch {
   _timeDraw() {
     // request another frame
     window.requestAnimationFrame(this._timeDraw.bind(this));
-    let diff;
-    diff = performance.now() - this.then;
+    const diff = performance.now() - this.then;
     if (diff < this._fps_interval) {
       // not enough time has passed, so we request next frame and give up on this render
       return;
@@ -61,14 +60,12 @@ class Sketch {
   }
 
   mousedown(e) {
-    let boundingBox;
-    boundingBox = this._canvas.getBoundingClientRect();
-    let ratio;
-    ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
-
-    let mx, my;
-    mx = (e.pageX - boundingBox.left) / ratio;
-    my = (e.pageY - boundingBox.top) / ratio;
+    // calculate size ration
+    const boundingBox = this._canvas.getBoundingClientRect();
+    const ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
+    // calculate real mouse position
+    const mx = (e.pageX - boundingBox.left) / ratio;
+    const my = (e.pageY - boundingBox.top) / ratio;
 
     this._boids.forEach(b => {
       b.gravity = new Vector(mx, my);
@@ -85,14 +82,12 @@ class Sketch {
   }
 
   touchdown(e) {
-    let boundingBox;
-    boundingBox = this._canvas.getBoundingClientRect();
-    let ratio;
-    ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
-
-    let tx, ty;
-    tx = (e.touches[0].pageX - boundingBox.left) / ratio;
-    ty = (e.touches[0].pageY - boundingBox.top) / ratio;
+    // calculate size ration
+    const boundingBox = this._canvas.getBoundingClientRect();
+    const ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
+    // calculate real touch position
+    const tx = (e.touches[0].pageX - boundingBox.left) / ratio;
+    const ty = (e.touches[0].pageY - boundingBox.top) / ratio;
 
     this._boids.forEach(b => {
       b.gravity = new Vector(tx, ty);
@@ -226,8 +221,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // detect if the user is using a mobile in order to determine
   // a more useful canvas size
-  let canvas_size;
-  canvas_size = is_mobile() ? 500 : 1000;
+  const canvas_size = is_mobile() ? 500 : 1000;
 
   // page loaded
   let canvas, ctx, s;
@@ -248,18 +242,16 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("touchend", e => s.touchup(e));
   document.addEventListener("keydown", e => s.keydown(e));
 
-  let ranges;
-  ranges = [...document.querySelectorAll(".form input[type=range]")];
-
-  let trail_checkbox, dynamic_checkbox, stats_checkbox;
-  trail_checkbox = document.querySelector("#showtrail");
-  dynamic_checkbox = document.querySelector("#dynamic");
-  stats_checkbox = document.querySelector("#stats");
-
-  let add_button, remove_button, reset_button;
-  add_button = document.querySelector("#addboid");
-  remove_button = document.querySelector("#removeboid");
-  reset_button = document.querySelector("#reset");
+  // input ranges
+  const ranges = [...document.querySelectorAll(".form input[type=range]")];
+  // input checkboxes
+  const trail_checkbox = document.querySelector("#showtrail");
+  const dynamic_checkbox = document.querySelector("#dynamic");
+  const stats_checkbox = document.querySelector("#stats");
+  // input buttons
+  const add_button = document.querySelector("#addboid");
+  const remove_button = document.querySelector("#removeboid");
+  const reset_button = document.querySelector("#reset");
 
   // update ranges, labels and checkboxes
   setInterval(() => {
