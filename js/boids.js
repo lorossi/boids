@@ -25,14 +25,14 @@ class Boid {
 
     // DEBUG
     /*
-    this._vel = new Vector(-10, 0);
+    this._vel = new Vector(-1, 0);
     this._acc = new Vector(0, 0);
     this._view_range = 200;
     this._max_vel = 10;
     */
 
     // rule 1
-    this._base_separation = 0.2 * this._scale_factor;
+    this._base_separation = 0.5 * this._scale_factor;
     this._separation_factor = 0;
     // rule 2
     this._base_alignment = 0.9 * this._scale_factor;
@@ -44,7 +44,7 @@ class Boid {
     this._base_gravity = 0.3 * this._scale_factor;
     this._gravity_factor = 0;
     // border / obstacle avoidance
-    this._avoidance_factor = 3 * this._scale_factor;
+    this._avoidance_factor = 4 * this._scale_factor;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2)) * this._scale_factor;
@@ -174,35 +174,36 @@ class Boid {
     return new Vector(0, 0);
   }
 
-  // avoid borders
+  // avoid borders and obstacles
   _avoid_border(obstacles) {
-    let steer;
-    steer = new Vector(0, 0);
-
     if (this._can_see_border(this._pos) || obstacles.length > 0) {
       // the boid can see the border, so get its current heading
       const heading = this._vel.heading2D();
-      for (let i = 0; i < Math.PI; i += Math.PI / 25) {
+      for (let j = 0; j < Math.PI; j += Math.PI / 25) {
         // check angle from 0 to PI 
-        for (let j = 0; j < 2; j++) {
+        for (let k = 0; k < 2; k++) {
+          let found = false;
           // both on left and right, relative to heading
-          const phi = i * (j == 0 ? -1 : 1) + heading;
-          // create new vector, same heading as current boid, as long as the view range
-          // and add the current poisition -> farthest it can see.
-          const dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
-          const visible_obstacles = obstacles.filter(o => this._can_see_obstacle(dpos, o));
+          const dir = k == 0 ? 1 : -1;
+          const phi = j * dir + heading;
 
-          if (!this._can_see_border(dpos) && visible_obstacles.length == 0) {
-            // with this current angle, the boid will avoid the border
-            // return the steering vector
-            steer = new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
-            return steer;
+          for (let i = this._view_range / 10; i < this._view_range && !found; i += this._view_range / 10) {
+            // create new vector, same heading as current boid, as long as the view range
+            // and add the current poisition -> farthest it can see.
+            const dpos = new Vector.fromAngle2D(phi).setMag(i).add(this._pos);
+            const visible_obstacles = obstacles.filter(o => this._can_see_obstacle(dpos, o));
+            if (obstacles.length > 0 && visible_obstacles.length > 0) {
+              found = true;
+            }
           }
+
+          const dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
+          if (!found && !this._can_see_border(dpos)) return new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
         }
       }
     }
 
-    return steer;
+    return new Vector(0, 0);
   }
 
   _can_see_border(vector) {
@@ -210,7 +211,7 @@ class Boid {
   }
 
   _can_see_obstacle(vector, obstacle) {
-    return dist(vector.x, vector.y, obstacle.pos.x, obstacle.pos.y) < obstacle.radius * 5;
+    return dist(vector.x, vector.y, obstacle.pos.x, obstacle.pos.y) < obstacle.radius * 2 + this._triangle_height;
   }
 
   show(ctx) {
@@ -253,7 +254,6 @@ class Boid {
     ctx.fill();
     ctx.stroke();
 
-
     // DEBUG
     /*
     ctx.beginPath();
@@ -261,7 +261,6 @@ class Boid {
     ctx.lineTo(this._view_range, 0);
     ctx.stroke();
     */
-
 
     ctx.restore();
   }
