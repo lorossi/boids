@@ -133,24 +133,34 @@ class Sketch {
     this._seed = parseInt(Date.now() / 1000);
     this._font_size = 24 * 900 / this._canvas.height * this._scale_factor;
 
-    let starting_boids;
-    starting_boids = this._is_mobile ? 100 : 200;
+    const starting_boids = this._is_mobile ? 100 : 200;
+    const starting_obstacles = this._is_mobile ? 10 : 20;
 
     this._boids = [];
     for (let i = 0; i < starting_boids; i++) {
       this._boids.push(new Boid(this._width, this._height, this._scale_factor));
+    }
+
+    this._obstacles = [];
+    for (let i = 0; i < starting_obstacles; i++) {
+      this._obstacles.push(new Obstacle(this._width, this._height, this._scale_factor));
     }
   }
 
   draw() {
     // ran continuosly
     this.background("white");
-    // draw and animate boids
-    this._boids.forEach(b => {
-      b.move(this._boids, this._frameCount, this._seed);
+    // draw obstacles
+    this._obstacles.forEach(b => {
       b.show(this._ctx);
     });
-    // show fps
+    // draw and animate boids
+    this._boids.forEach(b => {
+      b.move(this._boids, this._obstacles, this._frameCount, this._seed);
+      b.show(this._ctx);
+    });
+
+    // show stats
     if (this._show_stats) {
       this._ctx.save();
       this._ctx.textBaseline = "top";
@@ -218,7 +228,7 @@ class Sketch {
 
 
 document.addEventListener("DOMContentLoaded", () => {
-
+  console.clear();
   // detect if the user is using a mobile in order to determine
   // a more useful canvas size
   const canvas_size = is_mobile() ? 500 : 1000;
