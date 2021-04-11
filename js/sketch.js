@@ -12,6 +12,7 @@ class Sketch {
     this._height = this._canvas.height;
     this._mouse_pressed = false;
     this._draw_mode = false;
+    this._erase_mode = false;
 
     // start sketch
     this._setFps();
@@ -85,7 +86,7 @@ class Sketch {
     this._mouse_pressed = true;
     const coords = this._calculate_press_coords(e);
 
-    if (!this._draw_mode) {
+    if (!this._draw_mode && !this._erase_mode) {
       this.addGravity(coords.x, coords.y);
     } else {
       this._last_coords = coords;
@@ -107,6 +108,9 @@ class Sketch {
           // draw new obstacle
           new_obs.show(this._ctx);
         }
+      } else if (this._erase_mode) {
+        this.removeObstacle(coords.x, coords.y);
+        this._obstacles.forEach(b => b.show(this._ctx));
       }
       else {
         this.addGravity(coords.x, coords.y);
@@ -172,33 +176,32 @@ class Sketch {
 
   draw() {
     // ran continuosly
-    if (!this._draw_mode) {
-      this.background("white");
-      // draw obstacles
-      this._obstacles.forEach(b => {
-        b.show(this._ctx);
-      });
-      // draw and animate boids
-      this._boids.forEach(b => {
-        b.move(this._boids, this._obstacles, this._frameCount, this._seed);
-        b.show(this._ctx);
-      });
+    this.background("white");
+    // draw obstacles
+    this._obstacles.forEach(b => {
+      b.show(this._ctx);
+    });
+    // draw and animate boids
+    this._boids.forEach(b => {
+      b.move(this._boids, this._obstacles, this._frameCount, this._seed);
+      b.show(this._ctx);
+    });
 
-      // show stats
-      if (this._show_stats) {
-        this._ctx.save();
-        this._ctx.textBaseline = "top";
-        this._ctx.font = `${this._font_size}px Roboto`;
-        this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    // show stats
+    if (this._show_stats) {
+      this._ctx.save();
+      this._ctx.textBaseline = "top";
+      this._ctx.font = `${this._font_size}px Roboto`;
+      this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
 
-        this._ctx.textAlign = "left";
-        this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, this._font_size, this._font_size);
-        this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, this._font_size, this._font_size * 2);
+      this._ctx.textAlign = "left";
+      this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, this._font_size, this._font_size);
+      this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, this._font_size, this._font_size * 2);
 
-        this._ctx.restore();
-      }
+      this._ctx.restore();
     }
   }
+
 
   addBoid(number = 1) {
     for (let i = 0; i < number; i++) {
@@ -221,12 +224,16 @@ class Sketch {
   }
 
   addObstacle(x, y) {
-    const new_obs = new Obstacle(x, y, this._scale_factor, this._mouse_press_increments * 2);
+    const new_obs = new Obstacle(x, y, this._scale_factor, this._mouse_press_increments * 3);
     this._obstacles.push(new_obs);
     return new_obs;
   }
 
-  removeObstacles() {
+  removeObstacle(x, y) {
+    this._obstacles = this._obstacles.filter(o => dist(o.pos.x, o.pos.y, x, y) > o.radius * 2);
+  }
+
+  removeAllObstacles() {
     this._obstacles = [];
     this._draw_mode = false;
   }
@@ -258,6 +265,11 @@ class Sketch {
     return this._draw_mode;
   }
 
+  toggleEraseMode() {
+    this._erase_mode = !this._erase_mode;
+    return this._erase_mode;
+  }
+
   get show_stats() {
     return this._show_stats;
   }
@@ -272,6 +284,14 @@ class Sketch {
 
   get dynamic() {
     return this._boids[0].dynamic;
+  }
+
+  get draw_mode() {
+    return this._draw_mode;
+  }
+
+  get erase_mode() {
+    return this._erase_mode;
   }
 }
 
@@ -318,6 +338,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const reset_button = document.querySelector("#reset");
   const draw_button = document.querySelector("#drawmode");
   const erase_button = document.querySelector("#erasemode");
+  const erase_all_button = document.querySelector("#eraseall");
 
   // update ranges, labels and checkboxes
   setInterval(() => {
@@ -365,13 +386,38 @@ document.addEventListener("DOMContentLoaded", () => {
   remove_boid_button.addEventListener("click", () => s.removeBoid());
   reset_button.addEventListener("click", () => s.setup());
   draw_button.addEventListener("click", () => {
-    if (s.toggleDrawMode()) {
+    if (s.erase_mode) {
+      s.toggleEraseMode();
+      erase_button.value = erase_button.getAttribute("default");
+    }
+
+    s.toggleDrawMode();
+
+    if (s.draw_mode) {
+      draw_button.setAttribute("default", draw_button.value);
       draw_button.value = "Done";
     } else {
       draw_button.value = draw_button.getAttribute("default");
     }
   });
-  erase_button.addEventListener("click", () => s.removeObstacles());
 
+  erase_button.addEventListener("click", () => {
+    if (s.draw_mode) {
+      s.toggleDrawMode();
+      s.draw_mode = false;
+      draw_button.value = draw_button.getAttribute("default");
+    }
+
+    s.toggleEraseMode();
+
+    if (s.erase_mode) {
+      erase_button.setAttribute("default", erase_button.value);
+      erase_button.value = "Done";
+    } else {
+      erase_button.value = erase_button.getAttribute("default");
+    }
+  });
+
+  erase_all_button.addEventListener("click", () => s.removeAllObstacles());
 });
 

@@ -17,6 +17,8 @@ class Boid {
     this._max_force = 2 * this._scale_factor;
     this._trail_length = 100 * this._scale_factor;
     this._view_range = 50 * this._scale_factor;
+    this._angle_increments = Math.PI / 25;
+    this._view_range_increments = this._view_range / 10;
     // vectors
     this._pos = new Vector(random(this._view_range, this._width - this._view_range), random(this._view_range, this._height - this._view_range));
     this._vel = new Vector.random2D();
@@ -36,7 +38,7 @@ class Boid {
     this._base_gravity = 0.3 * this._scale_factor;
     this._gravity_factor = 0;
     // border / obstacle avoidance
-    this._avoidance_factor = 3 * this._scale_factor;
+    this._avoidance_factor = 5 * this._scale_factor;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2)) * this._scale_factor;
@@ -166,7 +168,7 @@ class Boid {
     if (this._can_see_border(this._pos) || obstacles.length > 0) {
       // the boid can see the border or an obstacle, so get its current heading
       const heading = this._vel.heading2D();
-      for (let j = 0; j < Math.PI; j += Math.PI / 25) {
+      for (let j = this._angle_increments; j < Math.PI; j += this._angle_increments) {
         // check angle from 0 to PI 
         for (let k = 0; k < 2; k++) {
           let found = false;
@@ -174,7 +176,7 @@ class Boid {
           const dir = k == 0 ? 1 : -1;
           const phi = j * dir + heading;
           // check each view range with fixed increments, from 0 to its maximum value
-          for (let i = this._view_range / 10; i <= this._view_range && obstacles.length > 0; i += this._view_range / 10) {
+          for (let i = this._view_range_increments; i <= this._view_range && obstacles.length > 0; i += this._view_range_increments) {
             // create new vector, same heading as current boid, as long as the view range
             // and add the current poisition -> farthest it can see.
             const dpos = new Vector.fromAngle2D(phi).setMag(i).add(this._pos);
@@ -208,7 +210,7 @@ class Boid {
   }
 
   _can_see_obstacle(vector, obstacle) {
-    return dist(vector.x, vector.y, obstacle.pos.x, obstacle.pos.y) < obstacle.radius * 2 + this._triangle_height;
+    return dist(vector.x, vector.y, obstacle.pos.x, obstacle.pos.y) < obstacle.radius * 2;
   }
 
   show(ctx) {
@@ -250,14 +252,6 @@ class Boid {
     ctx.lineTo(0, this._triangle_side / 2);
     ctx.fill();
     ctx.stroke();
-
-    // DEBUG
-    /*
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(this._view_range, 0);
-    ctx.stroke();
-    */
 
     ctx.restore();
   }
