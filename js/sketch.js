@@ -164,7 +164,7 @@ class Sketch {
     this._seed = parseInt(Date.now() / 1000);
     this._font_size = 24 * 900 / this._canvas.height * this._scale_factor;
 
-    const starting_boids = this._is_mobile ? 100 : 200;
+    const starting_boids = this._is_mobile ? 75 : 150;
 
     this._boids = [];
     for (let i = 0; i < starting_boids; i++) {
@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", () => {
   console.clear();
   // detect if the user is using a mobile in order to determine
   // a more useful canvas size
-  const canvas_size = is_mobile() ? 500 : 1000;
+  const canvas_size = is_mobile() ? 450 : 900;
 
   // page loaded
   let canvas, ctx, s;
