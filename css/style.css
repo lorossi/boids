@@ -118,6 +118,7 @@ body {
 @media only screen and (max-width: 600px) {
   body {
     font-size: 0.7rem;
+    overflow: hidden;
   }
 
   .container {
@@ -126,7 +127,7 @@ body {
   }
 
   #sketch {
-    margin: 2vh;
+    margin: 1vh;
     max-width: 90vw;
     max-height: 90vw;
   }
@@ -138,7 +139,7 @@ body {
   }
 
   .instructions {
-    max-width: 80vw;
+    max-width: 90vw;
     text-align: center;
   }
 

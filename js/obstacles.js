@@ -1,19 +1,13 @@
 class Obstacle {
-  constructor(width, height, scale_factor, base_radius = 10) {
-    this._width = width;
-    this._height = height;
+  constructor(x, y, scale_factor, base_radius = 10) {
+    this._pos = new Vector(x, y);
     this._scale_factor = scale_factor;
 
-    // shape is circular
-    this._border = this._width * 0.1;
     this._radius = base_radius * this._scale_factor;
-    this._pos = new Vector(random(this._border, this._width - this._border), random(this._border, this._height - this._border));
-
-    // DEBUG
-    /*
-    this._radius = 400;
-    this._pos = new Vector(0, this._height / 2);
-    */
+    // somewhere in the grey range
+    this._hue = random_int(0, 2);
+    this._sat = random_int(0, 2);
+    this._val = random_int(50, 55);
   }
 
   show(ctx) {
@@ -24,7 +18,7 @@ class Obstacle {
     // draw boid
     ctx.save();
     ctx.translate(px, py);
-    ctx.fillStyle = "black";
+    ctx.fillStyle = `hsla(${this._hue}, ${this._sat}%, ${this._val}%, 0.8)`;
     ctx.beginPath();
     ctx.arc(0, 0, this._radius, 0, 2 * Math.PI);
     ctx.fill();
@@ -33,6 +27,10 @@ class Obstacle {
 
   get radius() {
     return this._radius;
+  }
+
+  set pos(p) {
+    this._pos = p.copy();
   }
 
   get pos() {

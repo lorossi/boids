@@ -10,6 +10,8 @@ class Sketch {
     this._fpsBuffer = new Array(0);
     this._width = this._canvas.width;
     this._height = this._canvas.height;
+    this._mouse_pressed = false;
+    this._draw_mode = false;
 
     // start sketch
     this._setFps();
@@ -82,7 +84,12 @@ class Sketch {
   mousedown(e) {
     this._mouse_pressed = true;
     const coords = this._calculate_press_coords(e);
-    this.addGravity(coords.x, coords.y);
+
+    if (!this._draw_mode) {
+      this.addGravity(coords.x, coords.y);
+    } else {
+      this._last_coords = coords;
+    }
   }
 
   mouseup(e) {
@@ -93,26 +100,30 @@ class Sketch {
   mousemove(e) {
     if (this._mouse_pressed) {
       const coords = this._calculate_press_coords(e);
-      this.addGravity(coords.x, coords.y);
+      if (this._draw_mode) {
+        if (dist(coords.x, coords.y, this._last_coords.x, this._last_coords.y) > this._mouse_press_increments) {
+          this._last_coords = coords;
+          const new_obs = this.addObstacle(coords.x, coords.y);
+          // draw new obstacle
+          new_obs.show(this._ctx);
+        }
+      }
+      else {
+        this.addGravity(coords.x, coords.y);
+      }
     }
   }
 
   touchdown(e) {
-    this._mouse_pressed = true;
-    const coords = this._calculate_press_coords(e);
-    this.addGravity(coords.x, coords.y);
+    this.mousedown(e);
   }
 
   touchup(e) {
-    this._mouse_pressed = false;
-    this.removeGravity();
+    this.mouseup(e);
   }
 
   touchmove(e) {
-    if (this._mouse_pressed) {
-      const coords = this._calculate_press_coords(e);
-      this.addGravity(coords.x, coords.y);
-    }
+    this.mousemove(e);
   }
 
   keydown(e) {
@@ -130,14 +141,6 @@ class Sketch {
     document.body.removeChild(container);
   }
 
-  addGravity(x, y) {
-    this._boids.forEach(b => b.gravity = new Vector(x, y));
-  }
-
-  removeGravity() {
-    this._boids.forEach(b => b.gravity = undefined);
-  }
-
   background(color) {
     // reset background
     // reset canvas
@@ -151,13 +154,13 @@ class Sketch {
   setup() {
     this._is_mobile = is_mobile();
     this._scale_factor = this._is_mobile ? 0.5 : 1;
+    this._mouse_press_increments = 5 * this._scale_factor;
 
     this._show_stats = false;
     this._seed = parseInt(Date.now() / 1000);
     this._font_size = 24 * 900 / this._canvas.height * this._scale_factor;
 
     const starting_boids = this._is_mobile ? 100 : 200;
-    const starting_obstacles = this._is_mobile ? 10 : 20;
 
     this._boids = [];
     for (let i = 0; i < starting_boids; i++) {
@@ -165,36 +168,35 @@ class Sketch {
     }
 
     this._obstacles = [];
-    for (let i = 0; i < starting_obstacles; i++) {
-      this._obstacles.push(new Obstacle(this._width, this._height, this._scale_factor));
-    }
   }
 
   draw() {
     // ran continuosly
-    this.background("white");
-    // draw obstacles
-    this._obstacles.forEach(b => {
-      b.show(this._ctx);
-    });
-    // draw and animate boids
-    this._boids.forEach(b => {
-      b.move(this._boids, this._obstacles, this._frameCount, this._seed);
-      b.show(this._ctx);
-    });
+    if (!this._draw_mode) {
+      this.background("white");
+      // draw obstacles
+      this._obstacles.forEach(b => {
+        b.show(this._ctx);
+      });
+      // draw and animate boids
+      this._boids.forEach(b => {
+        b.move(this._boids, this._obstacles, this._frameCount, this._seed);
+        b.show(this._ctx);
+      });
 
-    // show stats
-    if (this._show_stats) {
-      this._ctx.save();
-      this._ctx.textBaseline = "top";
-      this._ctx.font = `${this._font_size}px Roboto`;
-      this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      // show stats
+      if (this._show_stats) {
+        this._ctx.save();
+        this._ctx.textBaseline = "top";
+        this._ctx.font = `${this._font_size}px Roboto`;
+        this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
 
-      this._ctx.textAlign = "left";
-      this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, this._font_size, this._font_size);
-      this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, this._font_size, this._font_size * 2);
+        this._ctx.textAlign = "left";
+        this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, this._font_size, this._font_size);
+        this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, this._font_size, this._font_size * 2);
 
-      this._ctx.restore();
+        this._ctx.restore();
+      }
     }
   }
 
@@ -208,6 +210,25 @@ class Sketch {
     for (let i = 0; i < number && this._boids.length > 0; i++) {
       this._boids.shift();
     }
+  }
+
+  addGravity(x, y) {
+    this._boids.forEach(b => b.gravity = new Vector(x, y));
+  }
+
+  removeGravity() {
+    this._boids.forEach(b => b.gravity = undefined);
+  }
+
+  addObstacle(x, y) {
+    const new_obs = new Obstacle(x, y, this._scale_factor, this._mouse_press_increments * 2);
+    this._obstacles.push(new_obs);
+    return new_obs;
+  }
+
+  removeObstacles() {
+    this._obstacles = [];
+    this._draw_mode = false;
   }
 
   toggleTrail() {
@@ -230,6 +251,11 @@ class Sketch {
 
   setFactors(f) {
     this._boids.forEach(b => b.factors = f);
+  }
+
+  toggleDrawMode() {
+    this._draw_mode = !this._draw_mode;
+    return this._draw_mode;
   }
 
   get show_stats() {
@@ -268,13 +294,16 @@ document.addEventListener("DOMContentLoaded", () => {
     s = new Sketch(canvas, ctx);
   }
 
+  // mouse event listeners
   canvas.addEventListener("click", e => s.click(e));
   canvas.addEventListener("mousedown", e => s.mousedown(e));
   canvas.addEventListener("mouseup", e => s.mouseup(e));
   canvas.addEventListener("mousemove", e => s.mousemove(e));
+  // touchscreen event listensers
   canvas.addEventListener("touchstart", e => s.touchdown(e));
   canvas.addEventListener("touchend", e => s.touchup(e));
   canvas.addEventListener("touchmove", e => s.touchmove(e));
+  // keyboard event listeners
   document.addEventListener("keydown", e => s.keydown(e));
 
   // input ranges
@@ -284,9 +313,11 @@ document.addEventListener("DOMContentLoaded", () => {
   const dynamic_checkbox = document.querySelector("#dynamic");
   const stats_checkbox = document.querySelector("#stats");
   // input buttons
-  const add_button = document.querySelector("#addboid");
-  const remove_button = document.querySelector("#removeboid");
+  const add_boid_button = document.querySelector("#addboid");
+  const remove_boid_button = document.querySelector("#removeboid");
   const reset_button = document.querySelector("#reset");
+  const draw_button = document.querySelector("#drawmode");
+  const erase_button = document.querySelector("#erasemode");
 
   // update ranges, labels and checkboxes
   setInterval(() => {
@@ -330,8 +361,17 @@ document.addEventListener("DOMContentLoaded", () => {
   stats_checkbox.addEventListener("input", () => s.toggleStats());
 
   // handle buttons
-  add_button.addEventListener("click", () => s.addBoid());
-  remove_button.addEventListener("click", () => s.removeBoid());
+  add_boid_button.addEventListener("click", () => s.addBoid());
+  remove_boid_button.addEventListener("click", () => s.removeBoid());
   reset_button.addEventListener("click", () => s.setup());
+  draw_button.addEventListener("click", () => {
+    if (s.toggleDrawMode()) {
+      draw_button.value = "Done";
+    } else {
+      draw_button.value = draw_button.getAttribute("default");
+    }
+  });
+  erase_button.addEventListener("click", () => s.removeObstacles());
+
 });
 
