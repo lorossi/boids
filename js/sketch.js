@@ -55,49 +55,64 @@ class Sketch {
     this._ctx.restore();
   }
 
-  click(e) {
+  _calculate_press_coords(e) {
+    // calculate size ratio
+    const boundingBox = this._canvas.getBoundingClientRect();
+    const ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
+    // calculate real mouse/touch position
+    if (!e.touches) {
+      // we're dealing with a mouse
+      const mx = (e.pageX - boundingBox.left) / ratio;
+      const my = (e.pageY - boundingBox.top) / ratio;
+      return { x: mx, y: my };
+    } else {
+      // we're dealing with a touchscreen
+      const tx = (e.touches[0].pageX - boundingBox.left) / ratio;
+      const ty = (e.touches[0].pageY - boundingBox.top) / ratio;
+      return { x: tx, y: ty };
+    }
 
+  }
+
+  click(e) {
+    //const coords = this._calculate_press_coords(e);
+    //this.addGravity(coords.x, coords.y);
   }
 
   mousedown(e) {
-    // calculate size ration
-    const boundingBox = this._canvas.getBoundingClientRect();
-    const ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
-    // calculate real mouse position
-    const mx = (e.pageX - boundingBox.left) / ratio;
-    const my = (e.pageY - boundingBox.top) / ratio;
-
-    this._boids.forEach(b => {
-      b.gravity = new Vector(mx, my);
-    });
+    this._mouse_pressed = true;
+    const coords = this._calculate_press_coords(e);
+    this.addGravity(coords.x, coords.y);
   }
 
   mouseup(e) {
-    this._boids.forEach(b => {
-      b.gravity = null;
-    });
+    this._mouse_pressed = false;
+    this.removeGravity();
   }
 
-  mousedragged(e) {
+  mousemove(e) {
+    if (this._mouse_pressed) {
+      const coords = this._calculate_press_coords(e);
+      this.addGravity(coords.x, coords.y);
+    }
   }
 
   touchdown(e) {
-    // calculate size ration
-    const boundingBox = this._canvas.getBoundingClientRect();
-    const ratio = Math.min(boundingBox.width, boundingBox.height) / this._canvas.getAttribute("width");
-    // calculate real touch position
-    const tx = (e.touches[0].pageX - boundingBox.left) / ratio;
-    const ty = (e.touches[0].pageY - boundingBox.top) / ratio;
-
-    this._boids.forEach(b => {
-      b.gravity = new Vector(tx, ty);
-    });
+    this._mouse_pressed = true;
+    const coords = this._calculate_press_coords(e);
+    this.addGravity(coords.x, coords.y);
   }
 
   touchup(e) {
-    this._boids.forEach(b => {
-      b.gravity = null;
-    });
+    this._mouse_pressed = false;
+    this.removeGravity();
+  }
+
+  touchmove(e) {
+    if (this._mouse_pressed) {
+      const coords = this._calculate_press_coords(e);
+      this.addGravity(coords.x, coords.y);
+    }
   }
 
   keydown(e) {
@@ -113,6 +128,14 @@ class Sketch {
 
     container.click();
     document.body.removeChild(container);
+  }
+
+  addGravity(x, y) {
+    this._boids.forEach(b => b.gravity = new Vector(x, y));
+  }
+
+  removeGravity() {
+    this._boids.forEach(b => b.gravity = undefined);
   }
 
   background(color) {
@@ -248,8 +271,10 @@ document.addEventListener("DOMContentLoaded", () => {
   canvas.addEventListener("click", e => s.click(e));
   canvas.addEventListener("mousedown", e => s.mousedown(e));
   canvas.addEventListener("mouseup", e => s.mouseup(e));
+  canvas.addEventListener("mousemove", e => s.mousemove(e));
   canvas.addEventListener("touchstart", e => s.touchdown(e));
   canvas.addEventListener("touchend", e => s.touchup(e));
+  canvas.addEventListener("touchmove", e => s.touchmove(e));
   document.addEventListener("keydown", e => s.keydown(e));
 
   // input ranges
