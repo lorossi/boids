@@ -23,14 +23,6 @@ class Boid {
     this._acc = new Vector.random2D();
     this._force = new Vector();
 
-    // DEBUG
-    /*
-    this._vel = new Vector(-1, 0);
-    this._acc = new Vector(0, 0);
-    this._view_range = 200;
-    this._max_vel = 10;
-    */
-
     // rule 1
     this._base_separation = 0.5 * this._scale_factor;
     this._separation_factor = 0;
@@ -44,7 +36,7 @@ class Boid {
     this._base_gravity = 0.3 * this._scale_factor;
     this._gravity_factor = 0;
     // border / obstacle avoidance
-    this._avoidance_factor = 8 * this._scale_factor;
+    this._avoidance_factor = 3 * this._scale_factor;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2)) * this._scale_factor;
@@ -73,7 +65,7 @@ class Boid {
 
     // compute all the forces
     // rule 1 - separate from other boids
-    const f1 = this._separation(others);
+    const f1 = this._separation(others, close_obstacles);
     // rule 2 - align to other boids
     const f2 = this._alignment(others);
     // rule 3 - cohesion (go to mass center)
@@ -106,9 +98,9 @@ class Boid {
   }
 
   // separation rule
-  _separation(boids) {
-    // skip separation if _gravity_center is defined
-    if (this._gravity_center) {
+  _separation(boids, close_obstacles) {
+    // skip separation if _gravity_center is defined or close obstacles are nearby
+    if (this._gravity_center || close_obstacles.length > 0) {
       return new Vector(0, 0);
     }
 
