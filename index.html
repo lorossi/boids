@@ -5,7 +5,7 @@
   <meta name="description" content="Boids" />
   <meta charset="utf-8">
   <title>Boids</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="author" content="Lorenzo Rossi">
   <link rel="shortcut icon" href="favicon.ico" />
@@ -16,6 +16,7 @@
   <script src="js/vectors.min.js"></script>
   <script src="js/utils.js"></script>
   <script src="js/boids.js"></script>
+  <script src="js/obstacles.js"></script>
   <script src="js/sketch.js"></script>
 </head>
 
@@ -24,9 +25,9 @@
     <canvas id="sketch" width="1000" height="1000">
     </canvas>
     <div class="form">
-      <div class="instructions">
-        <p>Click (or tap) on the screen to attract the boids.</p>
-        <p>Change parameters (and influence how boids move) by using the sliders.</p>
+      <div class="wrapper instructions">Click (or tap) on the screen to attract the boids. <br>
+        Change parameters (and influence how boids move) by using the sliders. <br>
+        Press the buttons below to draw (and erase) obstacles, see how boids react.
       </div>
       <div class="wrapper">
         <div class="formelement">
@@ -67,6 +68,11 @@
           <input type="checkbox" id="showtrail" name="showtrail">
           <label for="showtrail">show trail</label>
         </div>
+      </div>
+      <div class="center-wrapper">
+        <input type="button" id="drawmode" value="Draw obstacles"></input>
+        <input type="button" id="erasemode" value="Erase obstacles"></input>
+        <input type="button" id="eraseall" value="Erase all obstacles"></input>
       </div>
       <div class="center-wrapper">
         <input type="button" id="addboid" value="Add boid">

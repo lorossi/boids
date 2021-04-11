@@ -17,6 +17,8 @@ class Boid {
     this._max_force = 2 * this._scale_factor;
     this._trail_length = 100 * this._scale_factor;
     this._view_range = 50 * this._scale_factor;
+    this._angle_increments = Math.PI / 25;
+    this._view_range_increments = this._view_range / 10;
     // vectors
     this._pos = new Vector(random(this._view_range, this._width - this._view_range), random(this._view_range, this._height - this._view_range));
     this._vel = new Vector.random2D();
@@ -24,7 +26,7 @@ class Boid {
     this._force = new Vector();
 
     // rule 1
-    this._base_separation = 0.2 * this._scale_factor;
+    this._base_separation = 0.5 * this._scale_factor;
     this._separation_factor = 0;
     // rule 2
     this._base_alignment = 0.9 * this._scale_factor;
@@ -36,7 +38,7 @@ class Boid {
     this._base_gravity = 0.3 * this._scale_factor;
     this._gravity_factor = 0;
     // border / obstacle avoidance
-    this._avoidance_factor = 3 * this._scale_factor;
+    this._avoidance_factor = 5 * this._scale_factor;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2)) * this._scale_factor;
@@ -44,9 +46,8 @@ class Boid {
     this._trail = [];
   }
 
-  move(boids, frames, seed) {
+  move(boids, obstacles, frames, seed) {
     // some time variance
-
     if (this._dynamic_factors) {
       this._separation_factor = this._base_separation * (1 + 0.25 * Math.sin(frames / (60 * 10) + seed));
       this._alignment_factor = this._base_alignment * (1 + 0.25 * Math.sin(frames / (60 * 10) + Math.PI * seed));
@@ -61,10 +62,12 @@ class Boid {
 
     // all close boids excluding this one
     const others = boids.filter(b => b.pos.sub(this._pos.copy()).mag() < this._view_range && b != this);
+    // all close obstacles
+    const close_obstacles = obstacles.filter(o => o.pos.sub(this._pos.copy()).mag() < this._view_range + o.radius);
 
     // compute all the forces
     // rule 1 - separate from other boids
-    const f1 = this._separation(others);
+    const f1 = this._separation(others, close_obstacles);
     // rule 2 - align to other boids
     const f2 = this._alignment(others);
     // rule 3 - cohesion (go to mass center)
@@ -73,8 +76,8 @@ class Boid {
     const f4 = this._gravity();
 
     // compute all the accelerations
-    // check and avoid obstacles
-    const a1 = this._avoid_border();
+    // check (avoid) obstacles and borders
+    const a1 = this._avoid_obstacles(close_obstacles);
 
     // movement
     this._force = new Vector().add(f1).add(f2).add(f3).add(f4);
@@ -97,15 +100,13 @@ class Boid {
   }
 
   // separation rule
-  _separation(boids) {
-    // skip separation if _gravity_center is defined
-    if (this._gravity_center) {
+  _separation(boids, close_obstacles) {
+    // skip separation if _gravity_center is defined or close obstacles are nearby
+    if (this._gravity_center || close_obstacles.length > 0) {
       return new Vector(0, 0);
     }
 
-    let steer;
-    steer = new Vector();
-
+    let steer = new Vector();
     boids.forEach(b => {
       let dist;
       dist = this._pos.copy().sub(b.pos);
@@ -135,9 +136,6 @@ class Boid {
 
   // cohesion rule
   _cohesion(boids) {
-    let steer;
-    steer = new Vector();
-
     if (boids.length > 0) {
       let center;
       center = new Vector();
@@ -146,11 +144,10 @@ class Boid {
       });
       center.divide_scalar(boids.length);
 
-      steer = center.sub(this._pos);
-      steer.mult(this._cohesion_factor);
+      return center.sub(this._pos).mult(this._cohesion_factor);
     }
 
-    return steer;
+    return new Vector(0, 0);
   }
 
   // apply gravity
@@ -166,43 +163,54 @@ class Boid {
     return new Vector(0, 0);
   }
 
-  // avoid borders
-  _avoid_border() {
-    let steer;
-    steer = new Vector(0, 0);
-
-    if (this._can_see_border(this._pos)) {
-      // the boid can see the border, so get its current heading
-      let heading = this._vel.heading2D();
-      for (let i = 0; i < Math.PI; i += Math.PI / 25) {
+  // avoid borders and obstacles
+  _avoid_obstacles(obstacles) {
+    if (this._can_see_border(this._pos) || obstacles.length > 0) {
+      // the boid can see the border or an obstacle, so get its current heading
+      const heading = this._vel.heading2D();
+      for (let j = this._angle_increments; j < Math.PI; j += this._angle_increments) {
         // check angle from 0 to PI 
-        for (let j = 0; j < 2; j++) {
+        for (let k = 0; k < 2; k++) {
+          let found = false;
           // both on left and right, relative to heading
-          let phi = i * (j == 0 ? -1 : 1) + heading;
-          // create new vector, same heading as current boid, as long as the view range
-          // and add the current poisition -> farthest it can see.
-          let dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
-          if (!this._can_see_border(dpos)) {
-            // with this current angle, the boid will avoid the border
-            // return the steering vector
-            steer = new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
-            return steer;
+          const dir = k == 0 ? 1 : -1;
+          const phi = j * dir + heading;
+          // check each view range with fixed increments, from 0 to its maximum value
+          for (let i = this._view_range_increments; i <= this._view_range && obstacles.length > 0; i += this._view_range_increments) {
+            // create new vector, same heading as current boid, as long as the view range
+            // and add the current poisition -> farthest it can see.
+            const dpos = new Vector.fromAngle2D(phi).setMag(i).add(this._pos);
+            const visible_obstacles = obstacles.filter(o => this._can_see_obstacle(dpos, o));
+            if (visible_obstacles.length > 0) {
+              // an obstacle has been found
+              // set the flag to true and break the loop (no need to keep
+              // searching)
+              found = true;
+              break;
+            }
+          }
+
+          if (!found) {
+            // check if the border is not to be seen, then return the steering vector
+            const dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
+
+            if (!this._can_see_border(dpos)) {
+              return new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
+            }
           }
         }
       }
     }
 
-    return steer;
-  }
-
-  // avoid obstacles
-  _avoid_obstacles() {
-    let steer;
-    steer = new Vector(0, 0);
+    return new Vector(0, 0);
   }
 
   _can_see_border(vector) {
     return vector.x < this._view_range || vector.x > this._width - this._view_range || vector.y < this._view_range || vector.y > this._height - this._view_range;
+  }
+
+  _can_see_obstacle(vector, obstacle) {
+    return dist(vector.x, vector.y, obstacle.pos.x, obstacle.pos.y) < obstacle.radius * 2;
   }
 
   show(ctx) {
@@ -266,10 +274,10 @@ class Boid {
   }
 
   set gravity(g) {
-    if (g === null) {
-      this._gravity_center = null;
-    } else {
+    if (g) {
       this._gravity_center = g.copy();
+    } else {
+      this._gravity_center = null;
     }
   }
 

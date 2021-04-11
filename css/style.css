@@ -17,8 +17,8 @@ body {
 .container {
   z-index: 10;
 
-  width: 95vw;
-  height: 95vh;
+  width: 100vw;
+  height: 100vh;
 
   display: flex;
   justify-content: center;
@@ -44,15 +44,15 @@ body {
   flex-wrap: wrap;
   flex-shrink: 0;
 
-  min-height: 5vh;
   max-width: 80vw;
 
-  padding-top: 2vh;
-  padding-bottom: 2vh;
+  padding-top: 1vh;
+  padding-bottom: 1vh;
   padding-left: 2vw;
   padding-right: 2vw;
 
   margin-left: 4vw;
+  margin-right: 4vw;
 
   border-radius: 4px;
   border: 1px solid black;
@@ -60,6 +60,7 @@ body {
 
 .form input[type=range] {
   width: 8vw;
+  min-width: 100px;
 }
 
 .form input[type=button] {
@@ -111,52 +112,62 @@ body {
 }
 
 .instructions {
-  width: 100%;
-
-  margin-bottom: 1rem;
-
   text-align: center;
   user-select: none;
 }
 
-@media only screen and (max-width: 1400px) {
-  .container {
+@media only screen and (min-width: 600px) and (max-width: 1300px) { 
+  body {
+    font-size: 0.8rem;
+    overflow: hidden;
+  }
+
+
+ .container {
     flex-direction: column;
     justify-content: space-evenly;
-    height: 95vh;
+  } 
+
+   #sketch {
+    margin: 1vh;
+    max-width: 48vh;
+    max-height: 48vh;
   }
 
   .form {
-    flex-direction: row;
-    max-width: 90vw;
-    margin-left: 0;
-  }
-
-  .form input[type=range] {
-    width: 30vw;
-  }
-
-  #sketch {
-    margin: 2vh;
-    max-width: 90vw;
-    max-height: 90vw;
+    margin: 0;
   }
 }
 
 @media only screen and (max-width: 600px) {
   body {
     font-size: 0.7rem;
+    overflow: hidden;
+  }
+
+  .container {
+    flex-direction: column;
+    justify-content: space-evenly;
+  }
+
+  #sketch {
+    margin: 1vh;
+    max-width: 90vw;
+    max-height: 90vw;
+  }
+
+  .form {
+    flex-direction: row;
+    max-width: 90vw;
+    margin: 0;
+  }
+
+  .instructions {
+    max-width: 90vw;
+    text-align: center;
   }
 
   .form input[type=range] {
     width: 20vw;
   }
-
-  
-  .instructions {
-    max-width: 80vw;
-    text-align: center;
-    margin-bottom: 5vh;
-  }
-
 }
