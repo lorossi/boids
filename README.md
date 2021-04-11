@@ -2,7 +2,7 @@
 
 Fairly simple and straitforward boids simulation in EcmaScript.
 
-## Try it here! [lorossi.github.io/boids](https://lorossi.github.io/boids/)
+## Try it here! [lorenzoros.si/boids/](https://lorenzoros.si/boids/)
 
 ## What?
 
