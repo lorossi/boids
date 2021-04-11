@@ -44,7 +44,7 @@ class Boid {
     this._base_gravity = 0.3 * this._scale_factor;
     this._gravity_factor = 0;
     // border / obstacle avoidance
-    this._avoidance_factor = 4 * this._scale_factor;
+    this._avoidance_factor = 6 * this._scale_factor;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2)) * this._scale_factor;
@@ -82,7 +82,7 @@ class Boid {
     const f4 = this._gravity();
     // compute all the accelerations
     // check (avoid) obstacles and borders
-    const a1 = this._avoid_border(close_obstacles);
+    const a1 = this._avoid_obstacles(close_obstacles);
 
     // movement
     this._force = new Vector().add(f1).add(f2).add(f3).add(f4);
@@ -175,9 +175,9 @@ class Boid {
   }
 
   // avoid borders and obstacles
-  _avoid_border(obstacles) {
+  _avoid_obstacles(obstacles) {
     if (this._can_see_border(this._pos) || obstacles.length > 0) {
-      // the boid can see the border, so get its current heading
+      // the boid can see the border or an obstacle, so get its current heading
       const heading = this._vel.heading2D();
       for (let j = 0; j < Math.PI; j += Math.PI / 25) {
         // check angle from 0 to PI 
@@ -186,19 +186,29 @@ class Boid {
           // both on left and right, relative to heading
           const dir = k == 0 ? 1 : -1;
           const phi = j * dir + heading;
-
-          for (let i = this._view_range / 10; i < this._view_range && !found; i += this._view_range / 10) {
+          // check each view range with fixed increments, from 0 to its maximum value
+          for (let i = this._view_range / 10; i <= this._view_range && obstacles.length > 0; i += this._view_range / 10) {
             // create new vector, same heading as current boid, as long as the view range
             // and add the current poisition -> farthest it can see.
             const dpos = new Vector.fromAngle2D(phi).setMag(i).add(this._pos);
             const visible_obstacles = obstacles.filter(o => this._can_see_obstacle(dpos, o));
-            if (obstacles.length > 0 && visible_obstacles.length > 0) {
+            if (visible_obstacles.length > 0) {
+              // an obstacle has been found
+              // set the flag to true and break the loop (no need to keep
+              // searching)
               found = true;
+              break;
             }
           }
 
-          const dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
-          if (!found && !this._can_see_border(dpos)) return new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
+          if (!found) {
+            // check if the border is not to be seen, then return the steering vector
+            const dpos = new Vector.fromAngle2D(phi).setMag(this._view_range).add(this._pos);
+
+            if (!this._can_see_border(dpos)) {
+              return new Vector.fromAngle2D(phi).setMag(this._avoidance_factor);
+            }
+          }
         }
       }
     }
