@@ -235,7 +235,6 @@ class Sketch {
 
   removeAllObstacles() {
     this._obstacles = [];
-    this._draw_mode = false;
   }
 
   toggleTrail() {
