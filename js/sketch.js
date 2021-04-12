@@ -192,16 +192,17 @@ class Sketch {
       this._ctx.save();
       this._ctx.textBaseline = "top";
       this._ctx.font = `${this._font_size}px Roboto`;
-      this._ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+      this._ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
 
       this._ctx.textAlign = "left";
       this._ctx.fillText(`FPS: ${parseInt(this._frameRate)}`, this._font_size, this._font_size);
       this._ctx.fillText(`boids: ${parseInt(this._boids.length)}`, this._font_size, this._font_size * 2);
+      this._ctx.fillText(`seed: ${parseInt(this._seed)}`, this._font_size, this._font_size * 3);
+      this._ctx.fillText(`obstacles: ${parseInt(this._obstacles.length)}`, this._font_size, this._font_size * 4);
 
       this._ctx.restore();
     }
   }
-
 
   addBoid(number = 1) {
     for (let i = 0; i < number; i++) {
@@ -224,7 +225,7 @@ class Sketch {
   }
 
   addObstacle(x, y) {
-    const new_obs = new Obstacle(x, y, this._scale_factor, this._mouse_press_increments * 3);
+    const new_obs = new Obstacle(x, y, this._scale_factor, this._mouse_press_increments * 2, this._seed);
     this._obstacles.push(new_obs);
     return new_obs;
   }

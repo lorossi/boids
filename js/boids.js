@@ -38,7 +38,7 @@ class Boid {
     this._base_gravity = 0.3 * this._scale_factor;
     this._gravity_factor = 0;
     // border / obstacle avoidance
-    this._avoidance_factor = 5 * this._scale_factor;
+    this._avoidance_factor = 7 * this._scale_factor;
 
     // rendering
     this._triangle_side = parseInt(random_interval(8, 2)) * this._scale_factor;

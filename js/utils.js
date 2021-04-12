@@ -44,3 +44,7 @@ const wrap = (x, min_val = 0, max_val = 1) => {
 const is_mobile = () => {
   return (/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent));
 };
+
+const noise = (x, y, seed = 0) => {
+  return (Math.cos(x * 0.1 + seed) * Math.sin(y * 0.1 + 2 * seed) + 1) / 2;
+};
