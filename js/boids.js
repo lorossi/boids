@@ -168,7 +168,7 @@ class Boid {
     if (this._can_see_border(this._pos) || obstacles.length > 0) {
       // the boid can see the border or an obstacle, so get its current heading
       const heading = this._vel.heading2D();
-      for (let j = this._angle_increments; j < Math.PI; j += this._angle_increments) {
+      for (let j = 0; j < Math.PI; j += this._angle_increments) {
         // check angle from 0 to PI 
         for (let k = 0; k < 2; k++) {
           let found = false;
